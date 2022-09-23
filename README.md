@@ -10,9 +10,9 @@ The `cobra` package provides excellent command-line flag functionality, and `vip
 The goals of `asp` are to
 
   1. reduce the redundant boilerplate by concisely defining all of the necessary information in the config struct itself;
-  
+
   2. to encourage good practices by ensuring that _every_ option has config, command-line _and_ environment variable representation;
-  
+
   3. to avoid possible typos that using string-based configuration lookups can cause — Go can't tell that `viper.Get("sommeSetting")` is misspelled at compile time — but it _can_ tell that `config.sommeSetting` is invalid if the struct defines the member as `config.someSetting`.
 
 
@@ -26,7 +26,7 @@ Assuming that you have a `cobra`-Command-based tool stubbed out, all you need to
 
 3. Additionally, because of the way that the `cobra.Command.Run` function is called, you will probably want to inject the returned `asp.Asp` interface into your command context so that you can retrieve it inside of your `Run` implementation.
 
-Here's a contrived example from [../../cmd/asp-example/main.go](../../cmd/asp-example/main.go) that highlights some of the automatic name processing, supported types, and available overrides (on the `Verbose` member):
+Here's a contrived example from [example/main.go](example/main.go) that highlights some of the automatic name processing, supported types, and available overrides (on the `Verbose` member):
 
 ```go
 package main
@@ -37,7 +37,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jaredreisinger/sensorpush-proxy/pkg/asp"
+	"github.com/jaredreisinger/asp"
 )
 
 type Config struct {

@@ -1,0 +1,47 @@
+version: "3"
+
+# Since this is a library, we don't really build anything regularly... our
+# distribution is the raw source-code itself.  Nonetheless, we have tasks for
+# useful things like testing, running the example, etc.
+
+tasks:
+  default:
+    cmds:
+      - task: run
+
+  clean:
+    desc: Clean project
+    cmds:
+      # - rm -rf {{.BUILD_DIR}}
+      - rm -rf .task
+
+  test:
+    desc: Test project
+    cmds:
+      - go test -cover ./...
+
+  security:
+    desc: Run gosec for project
+    cmds:
+      - gosec -quiet ./...
+
+  pre-commit:
+    desc: Run pre-commit checks...
+    deps:
+      - test
+      # - build
+      - security
+    cmds:
+      - go vet ./...
+      # - task: build
+      # - task: test
+
+  help:
+    desc: Quick-run the example to show help
+    cmds:
+      - go run example/main.go --help
+
+  run:
+    desc: Run the example
+    cmds:
+      - go run example/main.go

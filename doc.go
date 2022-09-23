@@ -16,9 +16,9 @@
 // This is done by driving the command-line and environment variable settings
 // from a tagged struct that's used to define the config file format.
 //
-//     type Config struct {
-//       Host string `asp:""`
-//     }
+//	type Config struct {
+//	  Host string `asp:""`
+//	}
 package asp
 
 // The meta-viper (https://github.com/carlosvin/meta-viper) project does
