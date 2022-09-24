@@ -58,7 +58,7 @@ func stringToByteSlice() mapstructure.DecodeHookFuncValue {
 
 func stringToMapStringString() mapstructure.DecodeHookFuncValue {
 	return func(from reflect.Value, to reflect.Value) (interface{}, error) {
-		// log.Printf("attempting to convert string to byte slice? %v", from.Interface())
+		// log.Printf("attempting to convert string to map[string]string? %v", from.Interface())
 		if from.Kind() != reflect.String ||
 			to.Type() != reflect.TypeOf(map[string]string{}) {
 			return from.Interface(), nil

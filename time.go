@@ -7,6 +7,10 @@ const timeLayout = time.RFC3339Nano
 
 type timeValue time.Time
 
+var (
+	timeNow = time.Now // alias to enable testing
+)
+
 func newTimeValue(val time.Time, p *time.Time) *timeValue {
 	*p = val
 	return (*timeValue)(p)
@@ -38,11 +42,11 @@ func timeConv(sval string) (interface{}, error) {
 	case "":
 		return time.Time{}, nil
 	case "now":
-		return time.Now(), nil
+		return timeNow(), nil
 	case "utc":
-		return time.Now().UTC(), nil
+		return timeNow().UTC(), nil
 	case "local":
-		return time.Now().Local(), nil
+		return timeNow().Local(), nil
 	}
 
 	return time.Parse(timeLayout, sval)

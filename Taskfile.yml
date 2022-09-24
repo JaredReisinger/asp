@@ -4,6 +4,9 @@ version: "3"
 # distribution is the raw source-code itself.  Nonetheless, we have tasks for
 # useful things like testing, running the example, etc.
 
+vars:
+  COVERAGE_DIR: ./coverage
+
 tasks:
   default:
     cmds:
@@ -12,13 +15,23 @@ tasks:
   clean:
     desc: Clean project
     cmds:
-      # - rm -rf {{.BUILD_DIR}}
+      - rm -rf {{.COVERAGE_DIR}}
       - rm -rf .task
+
+  coveragedir:
+    desc: Create coverage directory
+    cmds:
+      - mkdir {{.COVERAGE_DIR}}
+    status:
+      - test -d {{.COVERAGE_DIR}}
 
   test:
     desc: Test project
+    deps:
+      - coveragedir
     cmds:
-      - go test -cover ./...
+      - go test -coverprofile {{.COVERAGE_DIR}}/cover.out ./...
+      - go tool cover -html {{.COVERAGE_DIR}}/cover.out -o {{.COVERAGE_DIR}}/coverage.html
 
   security:
     desc: Run gosec for project
@@ -29,12 +42,9 @@ tasks:
     desc: Run pre-commit checks...
     deps:
       - test
-      # - build
       - security
     cmds:
       - go vet ./...
-      # - task: build
-      # - task: test
 
   help:
     desc: Quick-run the example to show help
