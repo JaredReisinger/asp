@@ -61,7 +61,10 @@ func main() {
 		Run: commandHandler,
 	}
 
-	a, err := asp.Attach(cmd, defaults)
+	a, err := asp.Attach(
+		cmd, defaults,
+		asp.WithDefaultConfigName[Config]("asp-example"),
+	)
 	cobra.CheckErr(err)
 
 	// Ensure the `asp.Asp` value is available to the command handler when it
@@ -203,24 +206,4 @@ The examples above will result in:
 --first-name string   sets the FirstName value (or use APP_FIRSTNAME) (default "Mia")
 --last-name string    sets the LastName value (or use APP_LASTNAME)
 --more string         sets the More value (or use APP_MORE)
-```
-
-## 2022-07-26
-
-After playing around with some auto viper/cobra generation, I realized that generating a full cobra `Command` was going to be somewhat awkward, as was the idea of wrapping the `cobra.Command.Execute()` so as to pass all the needed stuff to the handler. Especially in the context of creating one or more utilities that use (some) common config, it really makes more sense to let the tools continue to define the base `cobra.Command`, but to provide helpers that help augment that command with persistent flags and provide a type-safe viper wrapper. This solves the 80:20 problem.
-
-So, the new model is to let the user/caller define the `cobra.Command` object themselves, and then call an `asp` helper that can take a config struct and process it so as to add some `cobra.Command` flags, and also set up `viper`'s config/flag/env-var settings, finally exposing a simple "load" that will populate/create a config struct. This "load" method can be called from inside any of the `cobra.Command` "Run" handlers.
-
-Note that the types supported are _heavily_ influenced by the pFlags capabilities.
-
-## _OLDER_
-
-Why? I really like viper and cobra for building 12-factor style applications, but there's a lot of overhead incurred (in lines-of-code) in creating the config, command-line, and environment variable settings for each option. The goal of `asp` is the (a) reduce the redundant boilerplate by concisely defining all of the necessary information in the config struct itself, (b) to encourage good practices by ensuring that _every_ option has config, command-line, _and_ environment variable representation, and (c) to avoid possible typos that using string-based configuration lookups can cause--Go can't tell that `viper.Get("sommeSetting")` is misspelled at compile time... but it _can_ tell that `config.sommeSetting` is invalid if the struct defines the member as `someSetting`.
-
-This is done by driving the command-line and environment variable settings from a tagged struct that's used to define the config file format.
-
-```
-type Config struct {
-    Host string `asp:""`
-}
 ```

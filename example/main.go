@@ -30,7 +30,10 @@ func main() {
 		Run: commandHandler,
 	}
 
-	a, err := asp.Attach(cmd, defaults)
+	a, err := asp.Attach(
+		cmd, defaults,
+		asp.WithDefaultConfigName[Config]("asp-example"),
+	)
 	cobra.CheckErr(err)
 
 	// Ensure the `asp.Asp` value is available to the command handler when it

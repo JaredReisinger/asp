@@ -15,7 +15,6 @@ package asp
 import (
 	// "builtin"
 
-	"fmt"
 	"log"
 	"reflect"
 
@@ -43,8 +42,10 @@ var ContextKey = contextKey{}
 // though!)
 type Asp[T IncomingConfig] interface {
 	Config() *T
-	// Command() *cobra.Command
-	// Viper() *viper.Viper
+
+	// In case you want/need to tweak these after they're created
+	Command() *cobra.Command
+	Viper() *viper.Viper
 
 	// Execute(handler func(config T, args []string)) error
 
@@ -56,11 +57,6 @@ type Asp[T IncomingConfig] interface {
 // provided, it defaults to `WithConfigFlag` and `WithEnvPrefix("APP_")`.
 func Attach[T IncomingConfig](cmd *cobra.Command, config T, options ...Option[T]) (Asp[T], error) {
 	vip := viper.New()
-	// cmd := &cobra.Command{
-	// 	// Run: func(cmd *cobra.Command, args []string) {
-	// 	// 	log.Printf("INSIDE COMMAND! %q", args)
-	// 	// },
-	// }
 
 	a := &asp[T]{
 		// config: config,
@@ -90,22 +86,22 @@ func Attach[T IncomingConfig](cmd *cobra.Command, config T, options ...Option[T]
 		return nil, err
 	}
 
-	vip.SetConfigName("config")
-	// viper.SetConfigType("yaml") // setting the config type takes precedence
-	// over the extension, which seems wrong!
-	appName := "TEMPDUMMY"
-	vip.AddConfigPath(fmt.Sprintf("/etc/%s", appName))
-	vip.AddConfigPath(fmt.Sprintf("$HOME/.config/%s", appName))
-	vip.AddConfigPath(fmt.Sprintf("$HOME/.%s", appName))
-	vip.AddConfigPath(".")
+	if a.defaultCfgName != "" {
+		vip.SetConfigName(a.defaultCfgName)
+
+		vip.AddConfigPath(".")
+		vip.AddConfigPath("$HOME/.config")
+		vip.AddConfigPath("$HOME")
+		vip.AddConfigPath("/etc")
+	}
 
 	return a, nil
-
 }
 
 type asp[T IncomingConfig] struct {
 	baseType reflect.Type
 	// config T
+	defaultCfgName string
 	envPrefix      string
 	withConfigFlag bool
 
@@ -134,19 +130,31 @@ type asp[T IncomingConfig] struct {
 // 	return err
 // }
 
-// func (a *asp[T]) Command() *cobra.Command {
-// 	return a.cmd
-// }
+func (a *asp[T]) Command() *cobra.Command {
+	return a.cmd
+}
 
-// func (a *asp[T]) Viper() *viper.Viper {
-// 	return a.vip
-// }
+func (a *asp[T]) Viper() *viper.Viper {
+	return a.vip
+}
 
 func (a *asp[T]) Debug() {
 	log.Printf("asp.Debug: %#v", a.vip.AllSettings())
 }
 
 func (a *asp[T]) Config() *T {
+	// Before reading the config, check to see if there was a `--config` option
+	// that specifies a particular config file!
+	expectCfgFile := false
+
+	if a.withConfigFlag && a.cfgFile != "" {
+		log.Printf("using config file %q", a.cfgFile)
+		// a.vip.SetConfigName(a.cfgFile)
+		// a.vip.AddConfigPath(".")
+		a.vip.SetConfigFile(a.cfgFile)
+		expectCfgFile = true
+	}
+
 	val := reflect.New(a.baseType)
 	// log.Printf("created config: %+v", val.Interface())
 	cfg := val.Interface().(*T)
@@ -156,7 +164,11 @@ func (a *asp[T]) Config() *T {
 		switch err.(type) {
 		case viper.ConfigFileNotFoundError:
 		case *viper.ConfigFileNotFoundError:
-			log.Printf("no config file found... perhaps there are environment variables")
+			if expectCfgFile {
+				log.Fatalf("specified config file %q not found", a.cfgFile)
+			} else {
+				log.Printf("no config file found... perhaps there are environment variables")
+			}
 		default:
 			log.Fatalf("read config error: (%T) %s", err, err.Error())
 		}
