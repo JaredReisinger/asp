@@ -1,7 +1,8 @@
 # asp - Automatic Settings Processor
 
-asp, the Automatic Settings Provider, an opinionated companion for `viper` and
-`cobra`.
+[![Go Reference](https://pkg.go.dev/badge/github.com/jaredreisinger/asp.svg)](https://pkg.go.dev/github.com/jaredreisinger/asp)
+
+asp, the Automatic Settings Provider, an opinionated companion for `viper` and `cobra`.
 
 ## Why does this exist?
 
