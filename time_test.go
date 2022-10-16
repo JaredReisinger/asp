@@ -22,8 +22,16 @@ func TestTimeValue(t *testing.T) {
 		t.Fail()
 	}
 
+	t.Logf(
+		"expected %q (%d), got %q (%d)",
+		expected, expected.UnixNano(),
+		v, time.Time(*v).UnixNano())
+
 	if time.Time(*v) != expected {
-		t.Logf("expected %q, got %q", expected, v)
+		t.Logf(
+			"expected %q (%d), got %q (%d)",
+			expected, expected.UnixNano(),
+			v, time.Time(*v).UnixNano())
 		t.Fail()
 	}
 
