@@ -16,7 +16,7 @@ func TestBetterStringToTime(t *testing.T) {
 		t.Logf("unexpected error: %v", err)
 		t.Fail()
 	}
-	t.Logf("converted %q to %#v", input, actual)
+	// t.Logf("converted %q to %#v", input, actual)
 
 	expected, err := time.Parse(time.RFC3339Nano, input)
 	if err != nil {
@@ -24,7 +24,7 @@ func TestBetterStringToTime(t *testing.T) {
 		t.Fail()
 	}
 
-	if actual != expected {
+	if !actual.(time.Time).Equal(expected) {
 		t.Logf("expected %q, got %q", expected, actual)
 		t.Fail()
 	}

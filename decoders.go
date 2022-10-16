@@ -16,7 +16,6 @@ import (
 	// "builtin"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"reflect"
 	"strings"
 	"time"
@@ -70,7 +69,7 @@ func stringToMapStringString() mapstructure.DecodeHookFuncValue {
 		dest := make(map[string]string)
 		entries := strings.Split(from.String(), ",")
 		for _, entry := range entries {
-			log.Printf("converting %q", entry)
+			// log.Printf("converting %q", entry)
 			keyVal := strings.SplitN(entry, "=", 2)
 			if len(keyVal) != 2 {
 				return nil, fmt.Errorf("unexpected map entry %q", entry)
