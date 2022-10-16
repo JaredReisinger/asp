@@ -1,6 +1,10 @@
 # asp - Automatic Settings Processor
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/jaredreisinger/asp.svg)](https://pkg.go.dev/github.com/jaredreisinger/asp)
+[![Go reference](https://img.shields.io/badge/pkg.go.dev-reference-007D9C?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/jaredreisinger/asp)
+![Go version](https://img.shields.io/github/go-mod/go-version/jaredreisinger/asp?logo=go&logoColor=white&style=flat-square)
+[![GitHub build](https://img.shields.io/github/workflow/status/jaredreisinger/asp/CI%20pipeline?logo=github&style=flat-square)](https://github.com/jaredreisinger/asp/actions/workflows/pipeline.yaml)
+[![Codecov](https://img.shields.io/codecov/c/github/jaredreisinger/asp?logo=codecov&label=codedov&style=flat-square)](https://codecov.io/gh/JaredReisinger/asp)
+[![License](https://img.shields.io/github/license/jaredreisinger/asp?style=flat-square)](https://github.com/JaredReisinger/asp/blob/main/LICENSE)
 
 asp, the Automatic Settings Provider, an opinionated companion for `viper` and `cobra`.
 
