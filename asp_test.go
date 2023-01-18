@@ -1,6 +1,7 @@
 package asp
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -76,6 +77,49 @@ func TestAttachWithDefaultConfigName(t *testing.T) {
 	aspActual := a.(*asp[TestConfig])
 
 	expect(t, 0, "defaultCfgName", "DEFAULT_CONFIG", aspActual.defaultCfgName)
+
+	// see what happens without a --config value...
+	aspActual.Config()
+
+	// also see what happens if the --config value is passed...
+	aspActual.cfgFile = "asp_test_config.yaml"
+	aspActual.Config()
+}
+
+func TestAttachWithBogusOption(t *testing.T) {
+	cmd := &cobra.Command{}
+
+	bogusError := errors.New("bogus")
+	bogusOption := func(a *asp[TestConfig]) error {
+		return bogusError
+	}
+
+	a, err := Attach(
+		cmd, defaultConfig,
+		bogusOption,
+	)
+
+	if !errors.Is(err, bogusError) {
+		t.Fail()
+	}
+
+	if a != nil {
+		t.Fail()
+	}
+}
+
+func TestAttachWithUnsupportedConfig(t *testing.T) {
+	cmd := &cobra.Command{}
+
+	badConfig := struct {
+		BadMember *int // we don't support pointer members!
+	}{}
+
+	_, err := Attach(cmd, badConfig)
+	if !errors.Is(err, ErrConfigFieldUnsupported) {
+		t.Fail()
+	}
+
 }
 
 func TestConfigResults(t *testing.T) {

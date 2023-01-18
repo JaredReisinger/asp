@@ -1,6 +1,7 @@
 package asp
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 	"time"
@@ -8,6 +9,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+type AnonymousEmbedded struct {
+	EmbeddedInt int
+}
 
 type TestConfig struct {
 	Time            time.Time
@@ -28,6 +33,8 @@ type TestConfig struct {
 	Nested struct {
 		Dummy int
 	}
+
+	AnonymousEmbedded
 }
 
 func TestProcessStruct(t *testing.T) {
@@ -44,13 +51,51 @@ func TestProcessStruct(t *testing.T) {
 
 	baseType, err := a.processStruct(TestConfig{}, "", a.envPrefix)
 	if err != nil {
-		t.Logf("unexpected error: %v", err)
-		t.Fail()
+		t.Errorf("unexpected error: %v", err)
 	}
 
 	if baseType != reflect.TypeOf(TestConfig{}) {
-		t.Fail()
+		t.Error("unexpected type")
 	}
 
 	// TODO: check viper/cobra settings?
+}
+
+func TestProcessStructErrors(t *testing.T) {
+	cmd := &cobra.Command{}
+	vip := viper.New()
+
+	a := &asp[TestConfig]{
+		// config: config,
+		envPrefix:      "APP_",
+		withConfigFlag: true,
+		vip:            vip,
+		cmd:            cmd,
+	}
+
+	// check for expected errors...
+	_, err := a.processStruct(nil, "", "")
+	if !errors.Is(err, ErrConfigMustBeStruct) {
+		t.Error("expected error")
+	}
+
+	cfgWithBadMember := struct {
+		BadMember *int
+	}{}
+
+	_, err = a.processStruct(cfgWithBadMember, "", "")
+	if !errors.Is(err, ErrConfigFieldUnsupported) {
+		t.Error("expected error")
+	}
+
+	cfgWithBadNestedMember := struct {
+		BadNest struct {
+			BadMember *int
+		}
+	}{}
+
+	_, err = a.processStruct(cfgWithBadNestedMember, "", "")
+	if !errors.Is(err, ErrConfigFieldUnsupported) {
+		t.Error("expected error")
+	}
 }
