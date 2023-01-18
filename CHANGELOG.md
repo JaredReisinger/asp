@@ -1,0 +1,12 @@
+# Changelog
+
+_All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
+
+
+## [0.0.1](https://github.com/JaredReisinger/asp/compare/v0.0.0...v0.0.1) (2023-01-18)
+
+
+### Bug Fixes
+
+* **build:** add GITHUB_TOKEN for setup-task ([850d738](https://github.com/JaredReisinger/asp/commit/850d738c428cc8a92b65afe98e6c69f514139136))
+* **build:** use semantic-release and goreleaser ([316d2b1](https://github.com/JaredReisinger/asp/commit/316d2b1751139f7dbe3d2e363d492bcde3985252))
