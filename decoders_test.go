@@ -82,6 +82,42 @@ func TestStringToByteSlice(t *testing.T) {
 	}
 }
 
+func TestStringToMapStringInt(t *testing.T) {
+	fn := stringToMapStringInt()
+
+	expected := map[string]int{
+		"key1": 1,
+		"key2": 2,
+	}
+
+	actualIntf, err := fn(reflect.ValueOf("key1=1,key2=2"), reflect.ValueOf(map[string]int{}))
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	actual := actualIntf.(map[string]int)
+
+	if len(actual) != len(expected) {
+		t.Errorf("expected len %d, got len %d", len(expected), len(actual))
+	}
+
+	for k, v := range expected {
+		va, ok := actual[k]
+		if !ok {
+			t.Errorf("expected key %q, missing", k)
+		}
+		if va != v {
+			t.Errorf("expected %q value %d, got %d", k, v, va)
+		}
+	}
+
+	// and a misformatted string is an error...
+	_, err = fn(reflect.ValueOf("key1"), reflect.ValueOf(map[string]int{}))
+	if err == nil {
+		t.Error("expected error")
+	}
+
+}
 func TestStringToMapStringString(t *testing.T) {
 	fn := stringToMapStringString()
 

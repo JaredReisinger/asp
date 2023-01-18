@@ -181,6 +181,7 @@ func (a *asp[T]) Config() *T {
 				mapstructure.StringToTimeDurationHookFunc(),
 				betterStringToTime(),
 				stringToByteSlice(),
+				stringToMapStringInt(),
 				stringToMapStringString(),
 				betterStringToSlice(","),
 			)))

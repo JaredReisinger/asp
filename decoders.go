@@ -17,6 +17,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -52,6 +53,42 @@ func stringToByteSlice() mapstructure.DecodeHookFuncValue {
 		// log.Printf("attempting to convert string to byte slice! %v, %v", from.Interface(), to.Interface())
 
 		return hex.DecodeString(from.String())
+	}
+}
+
+func stringToMapStringInt() mapstructure.DecodeHookFuncValue {
+	return func(from reflect.Value, to reflect.Value) (interface{}, error) {
+		// log.Printf("attempting to convert string to map[string]int? %v", from.Interface())
+		if from.Kind() != reflect.String ||
+			to.Type() != reflect.TypeOf(map[string]int{}) {
+			return from.Interface(), nil
+		}
+
+		// log.Printf("attempting to convert string to map[string]int! %v, %v", from.Interface(), to.Interface())
+
+		// check for "[]" around the string...
+		raw := from.String()
+		if strings.HasPrefix(raw, "[") && strings.HasSuffix(raw, "]") {
+			raw = strings.TrimSuffix(strings.TrimPrefix(raw, "["), "]")
+		}
+
+		// dest := to.Interface().(map[string]int)
+		dest := make(map[string]int)
+		entries := strings.Split(raw, ",")
+		for _, entry := range entries {
+			// log.Printf("converting %q", entry)
+			keyVal := strings.SplitN(entry, "=", 2)
+			if len(keyVal) != 2 {
+				return nil, fmt.Errorf("unexpected map entry %q", entry)
+			}
+			val, err := strconv.Atoi(keyVal[1])
+			if err != nil {
+				return nil, err
+			}
+			dest[keyVal[0]] = val
+		}
+
+		return dest, nil
 	}
 }
 

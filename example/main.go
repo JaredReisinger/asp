@@ -10,9 +10,11 @@ import (
 )
 
 type Config struct {
-	SomeValue   string
-	SomeFlag    bool
-	ManyNumbers []int
+	SomeValue       string
+	SomeFlag        bool
+	ManyNumbers     []int
+	MapStringInt    map[string]int
+	MapStringString map[string]string
 
 	SubSection struct {
 		NamesLikeThis string

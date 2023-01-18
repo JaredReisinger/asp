@@ -46,9 +46,11 @@ import (
 )
 
 type Config struct {
-	SomeValue   string
-	SomeFlag    bool
-	ManyNumbers []int
+	SomeValue       string
+	SomeFlag        bool
+	ManyNumbers     []int
+	MapStringInt    map[string]int
+	MapStringString map[string]string
 
 	SubSection struct {
 		NamesLikeThis string
@@ -100,21 +102,25 @@ Flags:
       --config string                        configuration file to load
   -h, --help                                 help for this command
       --many-numbers ints                    sets the ManyNumbers value (or use APP_MANYNUMBERS)
+      --map-string-int stringToInt           sets the MapStringInt value (or use APP_MAPSTRINGINT) (default [])
+      --map-string-string stringToString     sets the MapStringString value (or use APP_MAPSTRINGSTRING) (default [])
       --some-flag                            sets the SomeFlag value (or use APP_SOMEFLAG)
       --some-value string                    sets the SomeValue value (or use APP_SOMEVALUE) (default "DEFAULT STRING!")
       --sub-section-names-like-this string   sets the SubSection.NamesLikeThis value (or use APP_SUBSECTION_NAMESLIKETHIS)
   -v, --verbose                              get noisy (or use APP_VERBOSE)
-```
+  ```
 
 Simply by calling `asp.Attach()`, you've gotten the CLI flags, along with environment variable support _and_ config file parsing. The tagging on the `Config.Verbose` member alters the default help string and adds the `-v` shorthand. Try running this tool using variations of flags and environment values (and/or config!), and you will see the resulting config (line-breaks and whitespace added for legibility):
 
 ```shell
-$ APP_VERBOSE=true go run ./cmd/asp-example/main.go --some-value "from the CLI"
+$ APP_VERBOSE=true go run ./example/main.go --some-value "from the CLI"
 
-2022/08/02 20:24:13 got config: &main.Config{
+2023/01/17 23:57:44 got config: &main.Config{
   SomeValue:        "from the CLI",
   SomeFlag:         false,
   ManyNumbers:      []int(nil),
+  MapStringInt:     map[string]int{},
+  MapStringString:  map[string]string{},
   SubSection:       struct {NamesLikeThis string}{
     NamesLikeThis:     ""
   },

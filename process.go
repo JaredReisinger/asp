@@ -43,11 +43,11 @@ func (a *asp[T]) processStruct(s interface{}, parentCanonical string, parentEnv 
 			continue
 		}
 
-		// The attrNoDesc/attrDesc bifurcation exists because *originally* there
-		// was no string->map[string]string decoding support, and thus no way to
-		// represent maps in an environment variable.  This has been fixed, but
-		// it's still a useful concept to have the field description with and
-		// without the env-var notation, just in case.
+		// The attrDescNoEnv/attrDesc bifurcation exists because *originally*
+		// there was no string->map[string]string decoding support, and thus no
+		// way to represent maps in an environment variable.  This has been
+		// fixed, but it's still a useful concept to have the field description
+		// with and without the env-var notation, just in case.
 		canonicalName, attrLong, attrShort, attrEnv, attrDescNoEnv := getAttributes(f, parentCanonical, parentEnv)
 		attrDesc := fmt.Sprintf("%s (or use %s)", attrDescNoEnv, attrEnv)
 
@@ -131,18 +131,10 @@ func (a *asp[T]) processStruct(s interface{}, parentCanonical string, parentEnv 
 			flags.StringSliceP(l, s, val, d)
 
 		case map[string]int:
-			// note that viper doesn't parse environment variables for maps
-			// correctly (but it *does* seem to do slices!)... we also use
-			// `attrDescNoEnv` here!
-			flags.StringToIntP(l, s, val, attrDescNoEnv)
-			addEnvBinding = false
+			flags.StringToIntP(l, s, val, attrDesc)
 
 		case map[string]string:
-			// note that viper doesn't parse environment variables for maps
-			// correctly (but it *does* seem to do slices!)... we also use
-			// `attrDescNoEnv` here!
-			flags.StringToStringP(l, s, val, attrDescNoEnv)
-			// addEnvBinding = false
+			flags.StringToStringP(l, s, val, attrDesc)
 
 		default:
 			if f.Type.Kind() == reflect.Struct {
