@@ -3,6 +3,13 @@
 _All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
 
 
+## [0.0.2](https://github.com/JaredReisinger/asp/compare/v0.0.1...v0.0.2) (2023-01-18)
+
+
+### Bug Fixes
+
+* fix env var support on maps ([6e7847e](https://github.com/JaredReisinger/asp/commit/6e7847e4d60bfdd1f88348554979ad256fa1b8ac))
+
 ## [0.0.1](https://github.com/JaredReisinger/asp/compare/v0.0.0...v0.0.1) (2023-01-18)
 
 
