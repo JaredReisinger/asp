@@ -154,10 +154,13 @@ func (a *asp[T]) processStruct(s interface{}, parentCanonical string, parentEnv 
 					nestedParentEnv = fmt.Sprintf("%s_", attrEnv)
 				}
 
-				a.processStruct(
+				_, err = a.processStruct(
 					intf,
 					nestedParentCanonical,
 					nestedParentEnv)
+				if err != nil {
+					return
+				}
 
 				addBindings = false // prevent default flag/config additions!
 			} else {
@@ -179,9 +182,17 @@ func (a *asp[T]) processStruct(s interface{}, parentCanonical string, parentEnv 
 			// Start pushing into viper?  Note that we're going to need to handle
 			// parent paths pretty quickly!
 			vip.SetDefault(canonicalName, intf)
-			vip.BindPFlag(canonicalName, flags.Lookup(attrLong))
+
+			err = vip.BindPFlag(canonicalName, flags.Lookup(attrLong))
+			if err != nil {
+				return
+			}
+
 			if addEnvBinding {
-				vip.BindEnv(canonicalName, attrEnv)
+				err = vip.BindEnv(canonicalName, attrEnv)
+				if err != nil {
+					return
+				}
 			}
 		}
 	}

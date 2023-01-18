@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+# If there's an existing message, we're probably commiting from some tool, and
+# the interactive git-cz is the wrong thing to do... in that case, we do nothing
+# and allow the regular commit/hook experience to happen.  Or, in other words,
+# *only* do the git-cz logic if the incoming message is blank.
+
+if [ "$(grep -v '^#' $1 | wc --max-line-length)" -eq "0" ]; then
+  # exec < /dev/tty && npx --no-install git-cz --hook || true
+
+  # Sadly, commitizen-go performs the commit, it doesn't stop with just
+  # preparing the commit message.  In fact, *all* of the golang commitizen-
+  # equivalent tools seem to make this mistake, which makes them less ideal as
+  # tooling building blocks.  (It also doesn't take the COMMIT_MSG filename
+  # argument as it should.)
+  exec < /dev/tty && go run github.com/lintingzhen/commitizen-go
+fi

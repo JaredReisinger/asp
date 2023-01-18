@@ -12,6 +12,18 @@ tasks:
     cmds:
       - task: run
 
+  # The git hooks initialization isn't quite as streamlined as in Node/npm,
+  # where the package creator can "force install" the husky hooks during the
+  # "npm install" stage (which is a necessary precursor to doing any sort of
+  # development).  To approximate that, we have a "prepare" task that does the
+  # equivalent one-time local repo setup.  (Except for "task" itself, which is
+  # an annoying chicken-and-egg problem.)
+  prepare:
+    desc: One-time local repo setup
+    cmds:
+      - go mod download
+      - go run -v github.com/automation-co/husky install
+
   clean:
     desc: Clean project
     cmds:
@@ -36,7 +48,7 @@ tasks:
   security:
     desc: Run gosec for project
     cmds:
-      - gosec -quiet ./...
+      - go run github.com/securego/gosec/v2/cmd/gosec -quiet ./...
 
   pre-commit:
     desc: Run pre-commit checks...
@@ -55,3 +67,8 @@ tasks:
     desc: Run the example
     cmds:
       - go run example/main.go
+
+  release:
+    desc: Run a snapshot (test) release
+    cmds:
+      - goreleaser release --snapshot --rm-dist

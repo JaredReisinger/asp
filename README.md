@@ -76,8 +76,9 @@ func main() {
 	// runs.  You can also store the returned value in a global, but using
 	// context helps when you have more than one command with differing config
 	// structures.
-	cmd.ExecuteContext(
+	err = cmd.ExecuteContext(
 		context.WithValue(context.Background(), asp.ContextKey, a))
+	cobra.CheckErr(err)
 }
 
 func commandHandler(cmd *cobra.Command, args []string) {
