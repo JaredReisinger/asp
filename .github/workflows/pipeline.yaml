@@ -49,9 +49,9 @@ jobs:
             @semantic-release/git
             @semantic-release/exec
 
-      # - uses: act10ns/slack@v1
-      #   if: always()
-      #   with:
-      #     status: ${{ job.status }}
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - uses: act10ns/slack@v2
+        if: always()
+        with:
+          status: ${{ job.status }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
