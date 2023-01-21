@@ -41,7 +41,7 @@ func TestProcessStruct(t *testing.T) {
 	cmd := &cobra.Command{}
 	vip := viper.New()
 
-	a := &asp[TestConfig]{
+	a := &aspBase{
 		// config: config,
 		envPrefix:      "APP_",
 		withConfigFlag: true,
@@ -65,7 +65,7 @@ func TestProcessStructErrors(t *testing.T) {
 	cmd := &cobra.Command{}
 	vip := viper.New()
 
-	a := &asp[TestConfig]{
+	a := &aspBase{
 		// config: config,
 		envPrefix:      "APP_",
 		withConfigFlag: true,

@@ -59,7 +59,7 @@
 //
 //		a, err := asp.Attach(
 //			cmd, defaults,
-//			asp.WithDefaultConfigName[Config]("asp-example"),
+//			asp.WithDefaultConfigName("asp-example"),
 //		)
 //		cobra.CheckErr(err)
 //

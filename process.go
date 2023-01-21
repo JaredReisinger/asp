@@ -20,7 +20,7 @@ var (
 
 // processStruct is the workhorse that adds a (sub-)struct config into the viper
 // config and cobra command.
-func (a *asp[T]) processStruct(s interface{}, parentCanonical string, parentEnv string) (baseType reflect.Type, err error) {
+func (a *aspBase) processStruct(s interface{}, parentCanonical string, parentEnv string) (baseType reflect.Type, err error) {
 	vip, flags := a.vip, a.cmd.PersistentFlags()
 
 	// log.Printf("initializing struct for: %#v", s)

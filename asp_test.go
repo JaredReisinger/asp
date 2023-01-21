@@ -50,7 +50,7 @@ func TestAttachWithoutConfigFlag(t *testing.T) {
 
 	a, err := Attach(
 		cmd, defaultConfig,
-		WithoutConfigFlag[TestConfig],
+		WithoutConfigFlag,
 	)
 	if err != nil {
 		t.Logf("got error: %v", err)
@@ -67,7 +67,7 @@ func TestAttachWithDefaultConfigName(t *testing.T) {
 
 	a, err := Attach(
 		cmd, defaultConfig,
-		WithDefaultConfigName[TestConfig]("DEFAULT_CONFIG"),
+		WithDefaultConfigName("DEFAULT_CONFIG"),
 	)
 	if err != nil {
 		t.Logf("got error: %v", err)
@@ -90,7 +90,7 @@ func TestAttachWithBogusOption(t *testing.T) {
 	cmd := &cobra.Command{}
 
 	bogusError := errors.New("bogus")
-	bogusOption := func(a *asp[TestConfig]) error {
+	bogusOption := func(a *aspBase) error {
 		return bogusError
 	}
 

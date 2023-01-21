@@ -34,7 +34,7 @@ type contextKey struct{}
 
 var ContextKey = contextKey{}
 
-// Asp is an interface that represents the "callable" interface for
+// Asp[T IncomingConfig] is an interface that represents the interface for
 // settings/options.  After creating/initializing with a configuration structure
 // (with default values), the methods on the interface allow for loading from
 // command-line/config/environment, as well as lower-level access to the created
@@ -55,15 +55,17 @@ type Asp[T IncomingConfig] interface {
 // Attach adds to `cmd` the command-line arguments, and environment variable and
 // configuration file bindings inferred from `config`.  If no `Option`s are
 // provided, it defaults to `WithConfigFlag` and `WithEnvPrefix("APP_")`.
-func Attach[T IncomingConfig](cmd *cobra.Command, config T, options ...Option[T]) (Asp[T], error) {
+func Attach[T IncomingConfig](cmd *cobra.Command, config T, options ...Option) (Asp[T], error) {
 	vip := viper.New()
 
 	a := &asp[T]{
-		// config: config,
-		envPrefix:      "APP_",
-		withConfigFlag: true,
-		vip:            vip,
-		cmd:            cmd,
+		aspBase: aspBase{
+			// config: config,
+			envPrefix:      "APP_",
+			withConfigFlag: true,
+			vip:            vip,
+			cmd:            cmd,
+		},
 	}
 	// log.Printf("initializing config for: %#v", config)
 
@@ -71,7 +73,7 @@ func Attach[T IncomingConfig](cmd *cobra.Command, config T, options ...Option[T]
 
 	// handle any/all options...
 	for _, opt := range options {
-		err = opt(a)
+		err = opt(&a.aspBase)
 		if err != nil {
 			return nil, err
 		}
@@ -98,9 +100,12 @@ func Attach[T IncomingConfig](cmd *cobra.Command, config T, options ...Option[T]
 	return a, nil
 }
 
-type asp[T IncomingConfig] struct {
-	baseType reflect.Type
-	// config T
+// We use aspBase to represent everything *except* the generic-type-specific
+// stuff... this allows us to omit type specifiers in things like Option.  In
+// theory, we could also define AspBase as a non-generic interface, but we don't
+// currently have any use cases where we really need a non-type-specific
+// interface exposed.
+type aspBase struct {
 	defaultCfgName string
 	envPrefix      string
 	withConfigFlag bool
@@ -108,6 +113,24 @@ type asp[T IncomingConfig] struct {
 	vip     *viper.Viper
 	cmd     *cobra.Command
 	cfgFile string
+
+	// we *could* put baseType here, but it's only needed by Config(), which is
+	// (and can be) only exposed from the generic-type-specific interface.
+	//
+	// baseType reflect.Type
+}
+
+// I'm using the generic T to "seed" the type at the time that Attach() is
+// called, but it "pollutes" all usage of the asp instance, when the *only* call
+// that really benefits from it is asp.Config().  I *really* like not having to
+// explicitly provide the type in the .Config() call,
+type asp[T IncomingConfig] struct {
+	aspBase
+
+	// could we even put baseType in aspBase? In that case, would this type be
+	// `type asp[T IncomingConfig] aspBase`? ... We could, but still can't cast
+	// *asp[T] to *aspBase?
+	baseType reflect.Type
 }
 
 // func (a *asp[T]) Execute(handler func(config T, args []string)) error {
@@ -130,15 +153,15 @@ type asp[T IncomingConfig] struct {
 // 	return err
 // }
 
-func (a *asp[T]) Command() *cobra.Command {
+func (a *aspBase) Command() *cobra.Command {
 	return a.cmd
 }
 
-func (a *asp[T]) Viper() *viper.Viper {
+func (a *aspBase) Viper() *viper.Viper {
 	return a.vip
 }
 
-func (a *asp[T]) Debug() {
+func (a *aspBase) Debug() {
 	log.Printf("asp.Debug: %#v", a.vip.AllSettings())
 }
 

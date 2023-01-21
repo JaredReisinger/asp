@@ -5,9 +5,9 @@ import (
 )
 
 func TestWithEnvPrefix(t *testing.T) {
-	a := &asp[TestConfig]{}
+	a := &aspBase{}
 
-	err := WithEnvPrefix[TestConfig]("PREFIX")(a)
+	err := WithEnvPrefix("PREFIX")(a)
 	if err != nil {
 		t.Logf("unexpected error: %v", err)
 		t.Fail()
@@ -19,7 +19,7 @@ func TestWithEnvPrefix(t *testing.T) {
 }
 
 func TestWithConfigFlag(t *testing.T) {
-	a := &asp[TestConfig]{}
+	a := &aspBase{}
 
 	err := WithConfigFlag(a)
 	if err != nil {
@@ -33,7 +33,7 @@ func TestWithConfigFlag(t *testing.T) {
 }
 
 func TestWithoutConfigFlag(t *testing.T) {
-	a := &asp[TestConfig]{withConfigFlag: true}
+	a := &aspBase{withConfigFlag: true}
 
 	err := WithoutConfigFlag(a)
 	if err != nil {
