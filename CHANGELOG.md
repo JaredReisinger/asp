@@ -3,6 +3,13 @@
 _All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
 
 
+# [0.1.0](https://github.com/JaredReisinger/asp/compare/v0.0.2...v0.1.0) (2023-01-21)
+
+
+### Features
+
+* reduce need for generics ([60cd290](https://github.com/JaredReisinger/asp/commit/60cd2904e1883f5a17f705c9061ec47583145546))
+
 ## [0.0.2](https://github.com/JaredReisinger/asp/compare/v0.0.1...v0.0.2) (2023-01-18)
 
 
