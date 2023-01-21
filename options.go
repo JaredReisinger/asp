@@ -1,5 +1,6 @@
 package asp
 
+// Option represents an option to the [asp.Attach] method.
 type Option[T IncomingConfig] func(*asp[T]) error
 
 // WithDefaultConfigName specifies the filename to use when searching for a

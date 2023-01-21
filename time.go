@@ -1,11 +1,13 @@
 package asp
 
-import "time"
+import (
+	"time"
+)
 
-// helper for time.Time values...
-const timeLayout = time.RFC3339Nano
-
+// helpers for time.Time values...
 type timeValue time.Time
+
+const timeLayout = time.RFC3339Nano
 
 var (
 	timeNow = time.Now // alias to enable testing
@@ -37,7 +39,7 @@ func (d *timeValue) String() string {
 }
 
 func timeConv(sval string) (interface{}, error) {
-	// Handle some special time constants...
+	// handle some special time constants...
 	switch sval {
 	case "":
 		return time.Time{}, nil

@@ -10,89 +10,88 @@
 
 ## Why does this exist?
 
-The `cobra` package provides excellent command-line flag functionality, and `viper` provides a rich configuration store and environment variable binding... _but_... there's a lot of boilerplate and redundant code if you want to achieve the nirvana of CLI flags and environment variables _and_ configuration file support for _**all**_ flags/settings in your application. The `asp` package attempts to reduce this boilerplate by capturing it all from your "canonical" configure structure definition.
+The `cobra` package provides excellent command-line flag functionality, and `viper` provides a rich configuration store and environment variable binding… _but_… there’s a lot of boilerplate and redundant code if you want to achieve the nirvana of CLI flags and environment variables _and_ configuration file support for _**all**_ flags/settings in your application. The `asp` package attempts to reduce this boilerplate by capturing it all from your “canonical” configure structure definition.
 
 The goals of `asp` are to
 
-  1. reduce the redundant boilerplate by concisely defining all of the necessary information in the config struct itself;
+1. reduce the redundant boilerplate by concisely defining all of the necessary information in the config struct itself;
 
-  2. to encourage good practices by ensuring that _every_ option has config, command-line _and_ environment variable representation;
+2. encourage good practices by ensuring that _every_ option has config, command-line _and_ environment variable representation;
 
-  3. to avoid possible typos that using string-based configuration lookups can cause — Go can't tell that `viper.Get("sommeSetting")` is misspelled at compile time — but it _can_ tell that `config.sommeSetting` is invalid if the struct defines the member as `config.someSetting`.
-
+3. avoid possible typos that using string-based configuration lookups can cause—Go can’t tell that `viper.Get("sommeSetting")` is misspelled at compile time—but it _can_ tell that `config.sommeSetting` is invalid if the struct defines the member as `config.someSetting`.
 
 ## Getting started
 
-Assuming that you have a `cobra`-Command-based tool stubbed out, all you need to do is:
+Assuming that you have a `cobra`-Command-based tool stubbed out, all you need to do is:
 
-1. Create a type that defines your configuration syntax.
+1. Create a type that defines your configuration syntax.
 
 2. Call `asp.Attach` with your `cobra.Command` instance and an instance of your configuration struct that contains any default values.
 
 3. Additionally, because of the way that the `cobra.Command.Run` function is called, you will probably want to inject the returned `asp.Asp` interface into your command context so that you can retrieve it inside of your `Run` implementation.
 
-Here's a contrived example from [example/main.go](example/main.go) that highlights some of the automatic name processing, supported types, and available overrides (on the `Verbose` member):
+Here’s a contrived example from [example/main.go](example/main.go) that highlights some of the automatic name processing, supported types, and available overrides (on the `Verbose` member):
 
 ```go
 package main
 
 import (
-	"context"
-	"log"
+    "context"
+    "log"
 
-	"github.com/spf13/cobra"
+    "github.com/spf13/cobra"
 
-	"github.com/jaredreisinger/asp"
+    "github.com/jaredreisinger/asp"
 )
 
 type Config struct {
-	SomeValue       string
-	SomeFlag        bool
-	ManyNumbers     []int
-	MapStringInt    map[string]int
-	MapStringString map[string]string
+    SomeValue       string
+    SomeFlag        bool
+    ManyNumbers     []int
+    MapStringInt    map[string]int
+    MapStringString map[string]string
 
-	SubSection struct {
-		NamesLikeThis string
-	}
+    SubSection struct {
+        NamesLikeThis string
+    }
 
-	Verbose bool `asp.short:"v" asp.desc:"get noisy"`
+    Verbose bool `asp.short:"v" asp.desc:"get noisy"`
 }
 
 func main() {
-	defaults := Config{
-		SomeValue: "DEFAULT STRING!",
-	}
+    defaults := Config{
+        SomeValue: "DEFAULT STRING!",
+    }
 
-	cmd := &cobra.Command{
-		Run: commandHandler,
-	}
+    cmd := &cobra.Command{
+        Run: commandHandler,
+    }
 
-	a, err := asp.Attach(
-		cmd, defaults,
-		asp.WithDefaultConfigName[Config]("asp-example"),
-	)
-	cobra.CheckErr(err)
+    a, err := asp.Attach(
+        cmd, defaults,
+        asp.WithDefaultConfigName[Config]("asp-example"),
+    )
+    cobra.CheckErr(err)
 
-	// Ensure the `asp.Asp` value is available to the command handler when it
-	// runs.  You can also store the returned value in a global, but using
-	// context helps when you have more than one command with differing config
-	// structures.
-	err = cmd.ExecuteContext(
-		context.WithValue(context.Background(), asp.ContextKey, a))
-	cobra.CheckErr(err)
+    // Ensure the `asp.Asp` value is available to the command handler when it
+    // runs.  You can also store the returned value in a global, but using
+    // context helps when you have more than one command with differing config
+    // structures.
+    err = cmd.ExecuteContext(
+        context.WithValue(context.Background(), asp.ContextKey, a))
+    cobra.CheckErr(err)
 }
 
 func commandHandler(cmd *cobra.Command, args []string) {
-	// Extract the `asp.Asp` from the context and get the parsed config.
-	a := cmd.Context().Value(asp.ContextKey).(asp.Asp[Config])
-	config := a.Config()
+    // Extract the `asp.Asp` from the context and get the parsed config.
+    a := cmd.Context().Value(asp.ContextKey).(asp.Asp[Config])
+    config := a.Config()
 
-	log.Printf("got config: %#v", config)
+    log.Printf("got config: %#v", config)
 }
 ```
 
-If you try running this, and use the `--help` flag (thanks, cobra!), you'll get:
+If you try running this, and use the `--help` flag (thanks, cobra!), you’ll get:
 
 ```text
 Usage:
@@ -108,9 +107,9 @@ Flags:
       --some-value string                    sets the SomeValue value (or use APP_SOMEVALUE) (default "DEFAULT STRING!")
       --sub-section-names-like-this string   sets the SubSection.NamesLikeThis value (or use APP_SUBSECTION_NAMESLIKETHIS)
   -v, --verbose                              get noisy (or use APP_VERBOSE)
-  ```
+```
 
-Simply by calling `asp.Attach()`, you've gotten the CLI flags, along with environment variable support _and_ config file parsing. The tagging on the `Config.Verbose` member alters the default help string and adds the `-v` shorthand. Try running this tool using variations of flags and environment values (and/or config!), and you will see the resulting config (line-breaks and whitespace added for legibility):
+Simply by calling `asp.Attach()`, you’ve gotten the CLI flags, along with environment variable support _and_ config file parsing. The tagging on the `Config.Verbose` member alters the default help string and adds the `-v` shorthand. Try running this tool using variations of flags and environment values (and/or config!), and you will see the resulting config (line-breaks and whitespace added for legibility):
 
 ```shell
 $ APP_VERBOSE=true go run ./example/main.go --some-value "from the CLI"
@@ -128,7 +127,7 @@ $ APP_VERBOSE=true go run ./example/main.go --some-value "from the CLI"
 }
 ```
 
-## Getting fancy...
+## Getting fancy…
 
 When processing your configuration struct, `asp` turns `NamesLikeThis` into CLI flags with `--names-like-this`, and environment variables with `APP_NAMESLIKETHIS`. Named (non-anonymous) struct members are handled simiarly, with `SubSection.NamesLikeThis` becoming `--sub-section-names-like-this` and `APP_SUBSECTION_NAMESLIKETHIS`.
 
@@ -143,7 +142,7 @@ You can provide your own values for these with the following tags:
 
 You can see an example of the `asp.short` and `asp.desc` tags on the `Verbose` member in the above (Getting started)[#getting-started] section.
 
-> _Technically, the default long-CLI name behavior means that `asp` can create conflicting CLI names for `Foo.BarBaz` and `FooBar.Baz` — they'd both become `--foo-bar-baz` — but in practice this isn't very likely, and you can always provide your own `asp.long` value to mitigate the problem._
+> _Technically, the default long-CLI name behavior means that `asp` can create conflicting CLI names for `Foo.BarBaz` and `FooBar.Baz`—they’d both become `--foo-bar-baz`—but in practice this isn’t very likely, and you can always provide your own `asp.long` value to mitigate the problem._
 
 ## Supported types
 
@@ -165,14 +164,11 @@ Many of the flag types supported by `cobra` (by `pflags`, really) are supported:
 
 ## Embedded anonymous structs
 
-It's reasonable to want to compose app configuration out of sub-parts, and embed
-anonymous structs to make those values transparently available at runtime. This
-is `asp`'s default behavior with anonymous structs, but there are a few caveats
-about which you need to be aware:
+It’s reasonable to want to compose app configuration out of sub-parts, and embed anonymous structs to make those values transparently available at runtime. This is `asp`’s default behavior with anonymous structs, but there are a few caveats about which you need to be aware:
 
-- The config, flag, and environment variable names for an anonymous embedded struct _**do not**_ include the name of the anonymous embedded struct itself. If you want to include the struct name, simply don't make it an anonymous embed, and ignore the rest of this section entirely.
+- The config, flag, and environment variable names for an anonymous embedded struct _**do not**_ include the name of the anonymous embedded struct itself. If you want to include the struct name, simply don’t make it an anonymous embed, and ignore the rest of this section entirely.
 
-- When writing the anonymous embedded struct reference, you need to include a `mapstructure` tag to "squash" the members to the parent map for deserialization. It would be ideal if `asp` could somehow default this for you, but it cannot. (I wish it were the default for `mapstructure`, but alas, it is not.) For example:
+- When writing the anonymous embedded struct reference, you need to include a `mapstructure` tag to “squash” the members to the parent map for deserialization. It would be ideal if `asp` could somehow default this for you, but it cannot. (I wish it were the default for `mapstructure`, but alas, it is not.) For example:
 
   ```go
   type CommonFields struct {
@@ -186,9 +182,9 @@ about which you need to be aware:
   }
   ```
 
-  Without the `mapstructure` "squash" option, the `viper` configuration file values won't map to the final config object correctly.
+  Without the `mapstructure` “squash” option, the `viper` configuration file values won’t map to the final config object correctly.
 
-- When you write a config file (in YAML, TOML, or what-have-you), you must write as though the embedded fields exist directly in the parent:
+- When you write a config file (in YAML, TOML, or what-have-you), you must write as though the embedded fields exist directly in the parent:
 
   ```yaml
   # config.yaml
@@ -202,13 +198,13 @@ about which you need to be aware:
   # more: ...
   ```
 
-- As per standard Go behavior, however, while you will be able to "read" values from your loaded configuration using the embedded struct field shorthand (`config.FirstName`), you _cannot_ programmatically construct your config that way. In this case, for example to create defaults, you will need to provide the embedded struct explicitly:
+- As per standard Go behavior, however, while you will be able to “read” values from your loaded configuration using the embedded struct field shorthand (`config. FirstName`), you _cannot_ programmatically construct your config that way. In this case, for example to create defaults, you will need to provide the embedded struct explicitly:
 
   ```go
   var Default = Config{
-  	CommonFields: CommonFields{
-  		FirstName: "Mia",
-  	},
+      CommonFields: CommonFields{
+          FirstName: "Mia",
+      },
   }
   ```
 

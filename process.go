@@ -9,7 +9,12 @@ import (
 )
 
 var (
-	ErrConfigMustBeStruct     = errors.New("config must be a struct or pointer to struct")
+	// ErrConfigMustBeStruct indicates that the (default) config value passed to
+	// [asp.Attach] must be a struct (or pointer to struct) type.
+	ErrConfigMustBeStruct = errors.New("config must be a struct or pointer to struct")
+
+	// ErrConfigFieldUnsupported is returned when a member of the config struct
+	// is an unsupported type.
 	ErrConfigFieldUnsupported = errors.New("config struct field is of an unsupported type (pointer, array, channel or size-specific number)")
 )
 
