@@ -1,88 +1,97 @@
 package asp
 
 import (
-	"bytes"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBetterStringToTime(t *testing.T) {
+	t.Parallel()
+
 	fn := betterStringToTime()
 
-	input := "2022-01-02T03:04:05.666-07:00"
-	actual, err := fn(reflect.TypeOf(""), reflect.TypeOf(time.Time{}), input)
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-	// t.Errorf("converted %q to %#v", input, actual)
+	isoDatetime := "2022-01-02T03:04:05.666-07:00"
 
-	expected, err := time.Parse(time.RFC3339Nano, input)
+	expected, err := time.Parse(time.RFC3339Nano, isoDatetime)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	if !actual.(time.Time).Equal(expected) {
-		t.Errorf("expected %q, got %q", expected, actual)
+	cases := map[string]struct {
+		input    interface{}
+		outType  reflect.Type
+		err      error
+		expected interface{}
+	}{
+		"ISO datetime":          {isoDatetime, reflect.TypeOf(expected), nil, expected},
+		"to string passthrough": {isoDatetime, reflect.TypeOf(isoDatetime), nil, isoDatetime},
+		"from int passthrough":  {1, reflect.TypeOf(time.Time{}), nil, 1},
 	}
 
-	// other types cause input to just pass through...
-	actual, err = fn(reflect.TypeOf(""), reflect.TypeOf(""), input)
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
+	for k, v := range cases {
+		input := v.input
+		typ := v.outType
+		expectedErr := v.err
+		expectedResult := v.expected
+		t.Run(k, func(t *testing.T) {
+			t.Parallel()
+			actualIntf, err := fn(reflect.TypeOf(input), typ, input)
+			if expectedErr == assert.AnError {
+				assert.Error(t, err)
+			} else {
+				assert.Equal(t, expectedErr, err)
+			}
 
-	if actual != input {
-		t.Errorf("expected %q, got %q", input, actual)
-	}
-
-	actual, err = fn(reflect.TypeOf(1), reflect.TypeOf(time.Time{}), input)
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
-	if actual != input {
-		t.Errorf("expected %q, got %q", input, actual)
+			if err == nil {
+				assert.Equal(t, expectedResult, actualIntf)
+			}
+		})
 	}
 }
 
 func TestStringToByteSlice(t *testing.T) {
+	t.Parallel()
+
 	fn := stringToByteSlice()
 
-	expected := []byte{0xde, 0xad, 0xbe, 0xef}
-	actual, err := fn(reflect.ValueOf("deadbeef"), reflect.ValueOf([]byte{}))
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
+	cases := map[string]struct {
+		input    interface{}
+		outValue reflect.Value
+		err      error
+		expected interface{}
+	}{
+		"deadbeef":              {"deadbeef", reflect.ValueOf([]byte{}), nil, []byte{0xde, 0xad, 0xbe, 0xef}},
+		"to string passthrough": {"deadbeef", reflect.ValueOf(""), nil, "deadbeef"},
+		"from int passthrough":  {1, reflect.ValueOf([]byte{}), nil, 1},
 	}
 
-	// expectBytes(t, expected, actual.([]byte))
-	if !bytes.Equal(expected, actual.([]byte)) {
-		t.Errorf("expected %q, got %q", expected, actual)
-	}
+	for k, v := range cases {
+		input := v.input
+		outValue := v.outValue
+		expectedErr := v.err
+		expectedResult := v.expected
+		t.Run(k, func(t *testing.T) {
+			t.Parallel()
+			actualIntf, err := fn(reflect.ValueOf(input), outValue)
+			if expectedErr == assert.AnError {
+				assert.Error(t, err)
+			} else {
+				assert.Equal(t, expectedErr, err)
+			}
 
-	// different values pass through the 'from' unchanged...
-	input := reflect.ValueOf("deadbeef")
-	actual, err = fn(input, reflect.ValueOf(""))
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
-	if actual != input.Interface() {
-		t.Error("expected inupt to pass through unchanged")
-	}
-
-	input = reflect.ValueOf(1)
-	actual, err = fn(input, reflect.ValueOf([]byte{}))
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
-	if actual != input.Interface() {
-		t.Error("expected input to pass through unchanged")
+			if err == nil {
+				assert.Equal(t, expectedResult, actualIntf)
+			}
+		})
 	}
 }
 
 func TestStringToMapStringInt(t *testing.T) {
+	t.Parallel()
+
 	fn := stringToMapStringInt()
 
 	expected := map[string]int{
@@ -90,33 +99,35 @@ func TestStringToMapStringInt(t *testing.T) {
 		"key2": 2,
 	}
 
-	actualIntf, err := fn(reflect.ValueOf("key1=1,key2=2"), reflect.ValueOf(map[string]int{}))
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
+	cases := map[string]struct {
+		err    error
+		result map[string]int
+	}{
+		"key1=1,key2=2":   {nil, expected},
+		"[key1=1,key2=2]": {nil, expected},
+		"key1":            {assert.AnError, nil},
+		"key1=FAIL":       {assert.AnError, nil},
 	}
 
-	actual := actualIntf.(map[string]int)
+	for k, v := range cases {
+		input := k
+		expectedErr := v.err
+		expectedResult := v.result
+		t.Run(input, func(t *testing.T) {
+			t.Parallel()
+			actualIntf, err := fn(reflect.ValueOf(input), reflect.ValueOf(map[string]int{}))
+			if expectedErr == assert.AnError {
+				assert.Error(t, err)
+			} else {
+				assert.Equal(t, expectedErr, err)
+			}
 
-	if len(actual) != len(expected) {
-		t.Errorf("expected len %d, got len %d", len(expected), len(actual))
+			if expectedResult != nil {
+				actual := actualIntf.(map[string]int)
+				assert.Equal(t, expectedResult, actual)
+			}
+		})
 	}
-
-	for k, v := range expected {
-		va, ok := actual[k]
-		if !ok {
-			t.Errorf("expected key %q, missing", k)
-		}
-		if va != v {
-			t.Errorf("expected %q value %d, got %d", k, v, va)
-		}
-	}
-
-	// and a misformatted string is an error...
-	_, err = fn(reflect.ValueOf("key1"), reflect.ValueOf(map[string]int{}))
-	if err == nil {
-		t.Error("expected error")
-	}
-
 }
 func TestStringToMapStringString(t *testing.T) {
 	fn := stringToMapStringString()
@@ -126,66 +137,70 @@ func TestStringToMapStringString(t *testing.T) {
 		"key2": "value2",
 	}
 
-	actualIntf, err := fn(reflect.ValueOf("key1=value1,key2=value2"), reflect.ValueOf(map[string]string{}))
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
+	cases := map[string]struct {
+		err    error
+		result map[string]string
+	}{
+		"key1=value1,key2=value2": {nil, expected},
+		// "[key1=value1,key2=value2]": {assert.AnError, nil},
+		"key1": {assert.AnError, nil},
+		// "key1=FAIL":                 {assert.AnError, nil},
 	}
 
-	actual := actualIntf.(map[string]string)
+	for k, v := range cases {
+		input := k
+		expectedErr := v.err
+		expectedResult := v.result
+		t.Run(input, func(t *testing.T) {
+			t.Parallel()
+			actualIntf, err := fn(reflect.ValueOf(input), reflect.ValueOf(map[string]string{}))
+			if expectedErr == assert.AnError {
+				assert.Error(t, err)
+			} else {
+				assert.Equal(t, expectedErr, err)
+			}
 
-	if len(actual) != len(expected) {
-		t.Errorf("expected len %d, got len %d", len(expected), len(actual))
+			if expectedResult != nil {
+				actual := actualIntf.(map[string]string)
+				assert.Equal(t, expectedResult, actual)
+			}
+		})
 	}
-
-	for k, v := range expected {
-		va, ok := actual[k]
-		if !ok {
-			t.Errorf("expected key %q, missing", k)
-		}
-		if va != v {
-			t.Errorf("expected %q value %q, got %q", k, v, va)
-		}
-	}
-
-	// and a misformatted string is an error...
-	_, err = fn(reflect.ValueOf("key1"), reflect.ValueOf(map[string]string{}))
-	if err == nil {
-		t.Error("expected error")
-	}
-
 }
 
 func TestBetterStringToSlice(t *testing.T) {
+	t.Parallel()
+
 	fn := betterStringToSlice(",")
 
-	cases := []struct {
-		input    string
-		expected []string
+	expected := []string{"one", "two"}
+
+	cases := map[string]struct {
+		err    error
+		result []string
 	}{
-		{input: "one,two", expected: []string{"one", "two"}},
-		{input: "[one,two]", expected: []string{"one", "two"}},
-		// {input: "", expected: []string{"", ""}},
-		{input: "", expected: []string{}},
+		"one,two":   {nil, expected},
+		"[one,two]": {nil, expected},
+		"":          {nil, []string{}},
 	}
 
-	for i, c := range cases {
-		actualIntf, err := fn(reflect.String, reflect.Slice, c.input)
-		if err != nil {
-			t.Errorf("unexpected error (%d): %v", i, err)
-		}
-
-		actual := actualIntf.([]string)
-		expected := c.expected
-
-		if len(actual) != len(expected) {
-			t.Errorf("expected (%d) len %d, got len %d", i, len(expected), len(actual))
-		}
-
-		for k, v := range expected {
-			va := actual[k]
-			if va != v {
-				t.Errorf("expected (%d) %q value %q, got %q", i, k, v, va)
+	for k, v := range cases {
+		input := k
+		expectedErr := v.err
+		expectedResult := v.result
+		t.Run(input, func(t *testing.T) {
+			t.Parallel()
+			actualIntf, err := fn(reflect.String, reflect.Slice, input)
+			if expectedErr == assert.AnError {
+				assert.Error(t, err)
+			} else {
+				assert.Equal(t, expectedErr, err)
 			}
-		}
+
+			if expectedResult != nil {
+				actual := actualIntf.([]string)
+				assert.Equal(t, expectedResult, actual)
+			}
+		})
 	}
 }

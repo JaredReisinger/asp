@@ -2,9 +2,9 @@ package asp
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -18,9 +18,28 @@ var (
 	ErrConfigFieldUnsupported = errors.New("config struct field is of an unsupported type (pointer, array, channel or size-specific number)")
 )
 
-// processStruct is the workhorse that adds a (sub-)struct config into the viper
-// config and cobra command.
-func (a *aspBase) processStruct(s interface{}, parentCanonical string, parentEnv string) (baseType reflect.Type, err error) {
+// processStruct the the main entrypoint for creating CLI flags and environment
+// variable mappings for a configuration struct type.
+func (a *aspBase) processStruct(s interface{}) error {
+	// Now that we've separated the entrypoint and recursive handler, we can be
+	// slightly more specific about the requirements on the incoming
+	// type/defaults. (We could insist on a struct value, and not a
+	// point-to-struct.) But I don't think there's any *particular* reason to
+	// force this.
+	err := a.processStructInner(s, attrs{env: strings.TrimRight(a.envPrefix, "_")})
+	if err != nil {
+		return err
+	}
+
+	// We don't have to check the kind of `s`... if it got through
+	// processStructInner, the kind is acceptable!
+	a.baseType = reflect.Indirect(reflect.ValueOf(s)).Type()
+	return nil
+}
+
+// processStructInner is the (recursive) workhorse that adds a (sub-)struct config
+// into the viper config and cobra command.
+func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 	vip, flags := a.vip, a.cmd.PersistentFlags()
 
 	// log.Printf("initializing struct for: %#v", s)
@@ -29,14 +48,13 @@ func (a *aspBase) processStruct(s interface{}, parentCanonical string, parentEnv
 	// Anything else is invalid.
 	structVal := reflect.Indirect(reflect.ValueOf(s))
 	if structVal.Kind() != reflect.Struct {
-		err = ErrConfigMustBeStruct
-		return
+		return ErrConfigMustBeStruct
 	}
 
-	baseType = structVal.Type()
-	fields := reflect.VisibleFields(baseType)
+	fields := reflect.VisibleFields(structVal.Type())
 	// log.Printf("fields: %#v", fields)
 
+	var err error
 	for _, f := range fields {
 		// We deal with anonymous (embedded) structs by *not* updating the
 		// parentCanonical/parentEnv strings when recursing.  We also need to
@@ -53,10 +71,11 @@ func (a *aspBase) processStruct(s interface{}, parentCanonical string, parentEnv
 		// way to represent maps in an environment variable.  This has been
 		// fixed, but it's still a useful concept to have the field description
 		// with and without the env-var notation, just in case.
-		canonicalName, attrLong, attrShort, attrEnv, attrDescNoEnv := getAttributes(f, parentCanonical, parentEnv)
-		attrDesc := fmt.Sprintf("%s (or use %s)", attrDescNoEnv, attrEnv)
+		childAttrs := getAttributes(f)
+		// attrDesc := fmt.Sprintf("%s (or use %s)", attrDescNoEnv, attrEnv)
+		joinedAttrs := parentAttrs.join(childAttrs)
 
-		// Rather than setting handled to true in out myriad cases, we default
+		// Rather than setting handled to true in our myriad cases, we default
 		// to true, and make sure to set it to false in our default/unhandled
 		// cases.
 		handled := true
@@ -65,20 +84,18 @@ func (a *aspBase) processStruct(s interface{}, parentCanonical string, parentEnv
 
 		// log.Printf("handling field %q : anonymous? %v, index: %v", canonicalName, f.Anonymous, f.Index)
 
-		// This is some very repetitive code!  The flags helpers are typesafe
-		// (but not "fluent"), and thus `attrLong`, `attrShort`, and `atrDesc`
-		// have to get specified again and again.  Perhaps there's a better
-		// library for this, or an opportunity for a new one?
+		// This is some very repetitive code!  The flags helpers are type-safe
+		// (but not "fluent"), and thus the long, short, and desc values have to
+		// get specified again and again.  Perhaps there's a better library for
+		// this, or an opportunity for a new one?
 		//
-		// ```
-		// flag := flags.AsP(attrLong, attrShort, attrDesc)
-		// flag.IntP(v2.Int())
-		// ```
+		// ``` flag := flags.AsP(l, s, d)
+		// flag.IntP(v2.Int()) ```
 
 		// WAIT!!!!!! can we use flags.VarP()?
 
 		// use shortened names purely for concision...
-		l, s, d := attrLong, attrShort, attrDesc
+		l, s, d := joinedAttrs.long, joinedAttrs.short, joinedAttrs.desc
 		// fieldVal := structVal.Field(i)
 		fieldVal := structVal.FieldByIndex(f.Index)
 		intf := fieldVal.Interface()
@@ -136,27 +153,23 @@ func (a *aspBase) processStruct(s interface{}, parentCanonical string, parentEnv
 			flags.StringSliceP(l, s, val, d)
 
 		case map[string]int:
-			flags.StringToIntP(l, s, val, attrDesc)
+			flags.StringToIntP(l, s, val, d)
 
 		case map[string]string:
-			flags.StringToStringP(l, s, val, attrDesc)
+			flags.StringToStringP(l, s, val, d)
 
 		default:
 			if f.Type.Kind() == reflect.Struct {
-				nestedParentCanonical := parentCanonical
-				nestedParentEnv := parentEnv
+				recursiveAttrs := joinedAttrs
 
-				if !f.Anonymous {
-					nestedParentCanonical = fmt.Sprintf("%s.", canonicalName)
-					nestedParentEnv = fmt.Sprintf("%s_", attrEnv)
+				// need to think about whether
+				if f.Anonymous {
+					recursiveAttrs = parentAttrs
 				}
 
-				_, err = a.processStruct(
-					intf,
-					nestedParentCanonical,
-					nestedParentEnv)
+				err = a.processStructInner(intf, recursiveAttrs)
 				if err != nil {
-					return
+					return err
 				}
 
 				addBindings = false // prevent default flag/config additions!
@@ -167,8 +180,7 @@ func (a *aspBase) processStruct(s interface{}, parentCanonical string, parentEnv
 
 		if !handled {
 			log.Printf("unsupported type? %q %#v", f.Type.Kind(), f)
-			err = ErrConfigFieldUnsupported
-			return
+			return ErrConfigFieldUnsupported
 		}
 
 		if addBindings {
@@ -178,23 +190,23 @@ func (a *aspBase) processStruct(s interface{}, parentCanonical string, parentEnv
 
 			// Start pushing into viper?  Note that we're going to need to handle
 			// parent paths pretty quickly!
-			vip.SetDefault(canonicalName, intf)
+			vip.SetDefault(joinedAttrs.name, intf)
 
-			err = vip.BindPFlag(canonicalName, flags.Lookup(attrLong))
+			err = vip.BindPFlag(joinedAttrs.name, flags.Lookup(joinedAttrs.long))
 			if err != nil {
-				return
+				return err
 			}
 
 			if addEnvBinding {
-				err = vip.BindEnv(canonicalName, attrEnv)
+				err = vip.BindEnv(joinedAttrs.name, joinedAttrs.env)
 				if err != nil {
-					return
+					return err
 				}
 			}
 		}
 	}
 
-	return
+	return nil
 }
 
 // func (a *asp[T]) Execute(handler func(config T, args []string)) error {

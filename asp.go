@@ -15,7 +15,7 @@ package asp
 import (
 	// "builtin"
 
-	"log"
+	"log" // REVIEW: maybe update to log/slog, go 1.21?
 	"reflect"
 
 	"github.com/mitchellh/mapstructure"
@@ -24,7 +24,7 @@ import (
 )
 
 // IncomingConfig is a placeholder generic type that exists only to allow us to
-// define our innner and exposed value as strongly-typed to the originating
+// define our inner and exposed value as strongly-typed to the originating
 // configuration struct.
 type IncomingConfig interface {
 	interface{}
@@ -41,14 +41,24 @@ var ContextKey = contextKey{}
 // viper instance and cobra command.  (In most cases these should not be needed,
 // though!)
 type Asp[T IncomingConfig] interface {
+	// Config returns the aggregated configuration values, pulling from CLI
+	// flags, environment variables, and implicit or explict config file.
 	Config() *T
 
-	// In case you want/need to tweak these after they're created
+	// Command provides access to the [cobra.Command] that this instance of
+	// [Asp] was attached to, in case additional Command customization is
+	// needed.
 	Command() *cobra.Command
+
+	// Viper provides access to the [viper.Viper] that was created when this
+	// instance of [Asp] was attached to the command, in case additional Viper
+	// customization is needed.
 	Viper() *viper.Viper
 
 	// Execute(handler func(config T, args []string)) error
 
+	// Debug outputs (via [log.Printf]) some diagnostic information to help
+	// verify what settings/configs have been acquired.
 	Debug()
 }
 
@@ -83,7 +93,7 @@ func Attach[T IncomingConfig](cmd *cobra.Command, config T, options ...Option) (
 		cmd.PersistentFlags().StringVar(&a.cfgFile, "config", "", "configuration file to load")
 	}
 
-	a.baseType, err = a.processStruct(config, "", a.envPrefix)
+	err = a.processStruct(config)
 	if err != nil {
 		return nil, err
 	}
@@ -114,10 +124,7 @@ type aspBase struct {
 	cmd     *cobra.Command
 	cfgFile string
 
-	// we *could* put baseType here, but it's only needed by Config(), which is
-	// (and can be) only exposed from the generic-type-specific interface.
-	//
-	// baseType reflect.Type
+	baseType reflect.Type
 }
 
 // I'm using the generic T to "seed" the type at the time that Attach() is
@@ -126,11 +133,6 @@ type aspBase struct {
 // explicitly provide the type in the .Config() call,
 type asp[T IncomingConfig] struct {
 	aspBase
-
-	// could we even put baseType in aspBase? In that case, would this type be
-	// `type asp[T IncomingConfig] aspBase`? ... We could, but still can't cast
-	// *asp[T] to *aspBase?
-	baseType reflect.Type
 }
 
 // func (a *asp[T]) Execute(handler func(config T, args []string)) error {

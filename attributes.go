@@ -1,78 +1,113 @@
 package asp
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
 	"github.com/iancoleman/strcase"
 )
 
-// There's a precedence list for which values are used: first, the
-// attribute-specific tag (`asp.long`, asp.desc`) is used if present--and an
+// There’s a precedence list for which values are used: first, the
+// attribute-specific tag (`asp.long`, `asp.desc`) is used if present—and an
 // explicit empty string (`asp.long:""`) can be used to cancel/disable that
-// attribute. Next, that component of the general comma-separated `asp` tag is
-// used, but note that an empty or missing component (`asp:"long,,"`) does *not*
-// cancel/disable the attribute.  Finally, the default calculated value is used
-// as a fallback if the attribute hasn't been canceled.
-type tagKind string
+// attribute. Otherwise, that component of the general comma-separated `asp` tag
+// is used, but note that an empty or missing component (`asp:","` is missing
+// the “long” value) does *not* cancel/disable the attribute. Finally, the
+// default calculated/reflected value is used as a fallback *if* the attribute
+// hasn’t been canceled.
 
-const (
-	tagAll   = tagKind("asp")
-	tagLong  = tagKind("asp.long")
-	tagShort = tagKind("asp.short")
-	tagEnv   = tagKind("asp.env")
-	tagDesc  = tagKind("asp.desc")
-)
-
-type allIndex int
-
-const (
-	allLong allIndex = iota
-	allShort
-	allEnv
-	allDesc
-
-	allMax
-)
-
-// parentCanonical and parentEnv come "pre-suffixed"
-func getAttributes(f reflect.StructField,
-	parentCanonical string, parentEnv string) (
-	canonicalName string,
-	attrLong string, attrShort string, attrEnv string, attrDesc string) {
-
-	canonicalName = fmt.Sprintf("%s%s", parentCanonical, f.Name)
-
-	// note that we use "just uppercase" for the name, not
-	// strcase.ToScreamingSnake(), because convention for environment variables
-	// is to use '_' delimeters only at hierarchy boundaries
-	envName := fmt.Sprintf("%s%s", parentEnv, strings.ToUpper(f.Name))
-
-	// get attribute values...
-	attrLong = getAttribute(f, tagLong, allLong, strcase.ToKebab(canonicalName))
-	attrShort = getAttribute(f, tagShort, allShort, "")
-	attrEnv = getAttribute(f, tagEnv, allEnv, envName)
-	attrDesc = getAttribute(f, tagDesc, allDesc, fmt.Sprintf("sets the %s value", canonicalName))
-
-	return
-}
-
-func getAttribute(f reflect.StructField, k tagKind, i allIndex, fallback string) string {
-	// we end up calling Tag.Get(tagAll) multiple times... a little overhead,
-	// but calling before-hand requires the caller to understand the internals,
-	// *and* we need to call Tag.Get() for the specific tag anyway
-	attr, ok := f.Tag.Lookup(string(k))
-	if !ok {
-		all := strings.SplitN(f.Tag.Get(string(tagAll)), ",", int(allMax))
-		if len(all) > int(i) {
-			attr = strings.TrimSpace(all[i])
-		}
-
-		if attr == "" {
-			attr = fallback
-		}
+// getAttributes returns the various asp-consumed attributes for the given
+// field, based on the field name and any asp-specific tags.
+func getAttributes(f reflect.StructField) attrs {
+	// pre-fill with defaults from field name (canonicalize?)
+	a := attrs{
+		name:  f.Name,
+		long:  strcase.ToKebab(f.Name),
+		short: "",
+		env:   strings.ToUpper(f.Name),
+		desc:  "sets the {{.Name}} value (or use {{.EnvName}})",
 	}
 
-	return attr
+	// now go through the possible tags and allow them to override
+	for _, tag := range attrTags {
+		val, ok := f.Tag.Lookup(tag.tagName)
+		if !ok {
+			continue
+		}
+		tag.setter(&a, val)
+	}
+
+	return a
+}
+
+type tagInfo struct {
+	tagName string
+	setter  func(*attrs, string)
+}
+
+// Note that attrTags serves double-duty; it's the list of tags to parse, *and*
+// the order of attribute-specific tags is their order inside the high-level
+// overall tag... so that we can look up the indexed setter by adding 1.
+var attrTags []tagInfo
+
+func init() {
+	// has to be set in init to avoid circular use inside attrs.setAll()!
+	attrTags = []tagInfo{
+		{"asp", (*attrs).setAll},
+		{"asp.long", (*attrs).setLong},
+		{"asp.short", (*attrs).setShort},
+		{"asp.env", (*attrs).setEnv},
+		{"asp.desc", (*attrs).setDesc},
+	}
+}
+
+// The attrs struct holds the collection of attrs parsed from the struct field
+// tags.
+type attrs struct {
+	name  string
+	long  string
+	short string
+	env   string
+	desc  string // *template* string to allow full name to be substituted in?
+}
+
+func (a *attrs) setAll(s string) {
+	parts := strings.SplitN(s, ",", len(attrTags)-1)
+
+	for i, p := range parts {
+		p = strings.TrimSpace(p)
+		if len(p) > 0 {
+			attrTags[i+1].setter(a, p)
+		}
+	}
+}
+
+func (a *attrs) setLong(s string)  { a.long = s }
+func (a *attrs) setShort(s string) { a.short = s }
+func (a *attrs) setEnv(s string)   { a.env = s }
+func (a *attrs) setDesc(s string)  { a.desc = s }
+
+// combine builds a new attribute set using the aggregation/combination rules
+// for each individual field
+func (a *attrs) join(child attrs) attrs {
+	return attrs{
+		name:  joinField(a.name, child.name, "."),
+		long:  joinField(a.long, child.long, "-"),
+		short: child.short, // short flags are *never* joined!
+		env:   joinField(a.env, child.env, "_"),
+		desc:  child.desc, // descriptions are *never* joined!
+	}
+}
+
+// joinField is a helper for joining attrs fields.
+func joinField(prefix string, suffix string, sep string) string {
+	if prefix == "" {
+		return suffix
+	}
+
+	if suffix == "" {
+		return prefix
+	}
+
+	return prefix + sep + suffix
 }
