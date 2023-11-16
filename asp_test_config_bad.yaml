@@ -1,0 +1,6 @@
+# dummy config file for asp_test.go
+string: 5
+time: not a time
+duration: not a duration
+bool: not a bool
+int: not an int

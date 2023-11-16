@@ -13,11 +13,14 @@ var (
 	timeNow = time.Now // alias to enable testing
 )
 
-func NewTimeValue(val time.Time, p *time.Time) *timeValue {
-	*p = val
-	return (*timeValue)(p)
+// NewTimeValue returns an interface around [time.Time] that supports [cobra]
+// and the [pflag.Value] interface.
+func NewTimeValue() *timeValue {
+	return &timeValue{}
 }
 
+// Set uses our string-to-time conversion/decoding logic to set the [time.Time]
+// value.
 func (d *timeValue) Set(s string) error {
 	v, err := timeConv(s)
 
@@ -25,10 +28,12 @@ func (d *timeValue) Set(s string) error {
 	return err
 }
 
+// Type returns "time" for the type of the value.
 func (d *timeValue) Type() string {
 	return "time"
 }
 
+// String renders the time value as a string.
 func (d *timeValue) String() string {
 	// return (*time.Time)(d).String()
 	t := (*time.Time)(d)
@@ -38,9 +43,9 @@ func (d *timeValue) String() string {
 	return t.Format(timeLayout)
 }
 
-func timeConv(sval string) (interface{}, error) {
+func timeConv(s string) (interface{}, error) {
 	// handle some special time constants...
-	switch sval {
+	switch s {
 	case "":
 		return time.Time{}, nil
 	case "now":
@@ -51,5 +56,5 @@ func timeConv(sval string) (interface{}, error) {
 		return timeNow().Local(), nil
 	}
 
-	return time.Parse(timeLayout, sval)
+	return time.Parse(timeLayout, s)
 }

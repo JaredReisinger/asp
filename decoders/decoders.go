@@ -24,24 +24,30 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// BetterStringToTime handles empty strings as zero time
-func BetterStringToTime() mapstructure.DecodeHookFuncType {
-	return func(f reflect.Type, t reflect.Type, data interface{}) (
-		interface{}, error) {
-		// log.Printf("attempting to convert string to time? %v --> %v", f, t)
-		if f.Kind() != reflect.String {
-			return data, nil
-		}
-		if t != reflect.TypeOf(time.Time{}) {
-			return data, nil
+// Note that even for the implementations that extend from the default
+// mapstructure one, we now *always* use the [mapstructure.DecodeHookFuncValue]
+// interface, rather than only using type or kind.  This has the advantage of
+// being the "newer" style, and also allows us to refactor out some common test
+// cases.
+
+// StringToTime is similar to [mapstructure.StringToTimeHookFunc], but it
+// supports a few magical string constants ("" is zero time, and "now", "utc",
+// and "local" yield the current time), and assumes RFC3399Nano layout.
+func StringToTime() mapstructure.DecodeHookFuncValue {
+	return func(from reflect.Value, to reflect.Value) (interface{}, error) {
+		// log.Printf("attempting to convert string to time? %v --> %v", from, to)
+		if from.Kind() != reflect.String ||
+			to.Type() != reflect.TypeOf(time.Time{}) {
+			return from.Interface(), nil
 		}
 
-		// log.Printf("attempting to convert string to time!! %v --> %v (%q)", f, t, data.(string))
-		// Convert it by parsing
-		return timeConv(data.(string))
+		// log.Printf("attempting to convert string to time!! %v --> %v (%q)", from, to, from.String())
+		return timeConv(from.String())
 	}
 }
 
+// StringToByteSlice decodes a hex-encoded string as a series of bytes, useful
+// for binary tokens, etc.
 func StringToByteSlice() mapstructure.DecodeHookFuncValue {
 	return func(from reflect.Value, to reflect.Value) (interface{}, error) {
 		// log.Printf("attempting to convert string to byte slice? %v", from.Interface())
@@ -56,6 +62,9 @@ func StringToByteSlice() mapstructure.DecodeHookFuncValue {
 	}
 }
 
+// StringToMapStringInt decodes a "keyOne=1,keyTwo=2"-style string into a map.
+// The input string may optionally be surrounded by square brackets
+// ("[keyOne=1,keyTwo=2]").
 func StringToMapStringInt() mapstructure.DecodeHookFuncValue {
 	return func(from reflect.Value, to reflect.Value) (interface{}, error) {
 		// log.Printf("attempting to convert string to map[string]int? %v", from.Interface())
@@ -65,16 +74,9 @@ func StringToMapStringInt() mapstructure.DecodeHookFuncValue {
 		}
 
 		// log.Printf("attempting to convert string to map[string]int! %v, %v", from.Interface(), to.Interface())
-
-		// check for "[]" around the string...
-		raw := from.String()
-		if strings.HasPrefix(raw, "[") && strings.HasSuffix(raw, "]") {
-			raw = strings.TrimSuffix(strings.TrimPrefix(raw, "["), "]")
-		}
-
 		// dest := to.Interface().(map[string]int)
 		dest := make(map[string]int)
-		entries := strings.Split(raw, ",")
+		entries := getListEntries(from.String(), ",")
 		for _, entry := range entries {
 			// log.Printf("converting %q", entry)
 			keyVal := strings.SplitN(entry, "=", 2)
@@ -92,6 +94,9 @@ func StringToMapStringInt() mapstructure.DecodeHookFuncValue {
 	}
 }
 
+// StringToMapStringString decodes a "keyOne=val1,keyTwo=val2"-style string into
+// a map. The input string may optionally be surrounded by square brackets
+// ("[keyOne=val1,keyTwo=val2]").
 func StringToMapStringString() mapstructure.DecodeHookFuncValue {
 	return func(from reflect.Value, to reflect.Value) (interface{}, error) {
 		// log.Printf("attempting to convert string to map[string]string? %v", from.Interface())
@@ -101,10 +106,9 @@ func StringToMapStringString() mapstructure.DecodeHookFuncValue {
 		}
 
 		// log.Printf("attempting to convert string to map[string]string! %v, %v", from.Interface(), to.Interface())
-
 		// dest := to.Interface().(map[string]string)
 		dest := make(map[string]string)
-		entries := strings.Split(from.String(), ",")
+		entries := getListEntries(from.String(), ",")
 		for _, entry := range entries {
 			// log.Printf("converting %q", entry)
 			keyVal := strings.SplitN(entry, "=", 2)
@@ -118,26 +122,32 @@ func StringToMapStringString() mapstructure.DecodeHookFuncValue {
 	}
 }
 
-// BetterStringToSlice improves on mapstructure's StringToSliceHookFunc
-// by checking for a wrapping "[" and "]" which sometimes happens during flag
-// serialization.
-func BetterStringToSlice(sep string) mapstructure.DecodeHookFuncKind {
-	return func(f reflect.Kind, t reflect.Kind, data interface{}) (
-		interface{}, error) {
-		if f != reflect.String || t != reflect.Slice {
-			return data, nil
+// StringToSlice is similar to [mapstructure.StringToSliceHookFunc], but can
+// also handle input wrapped in square brackets, which sometimes happens during
+// CLI flag serialization.
+func StringToSlice(sep string) mapstructure.DecodeHookFuncValue {
+	return func(from reflect.Value, to reflect.Value) (interface{}, error) {
+		if from.Kind() != reflect.String ||
+			to.Type() != reflect.TypeOf([]string{}) {
+			return from.Interface(), nil
 		}
 
-		raw := data.(string)
-		if raw == "" {
-			return []string{}, nil
-		}
-
-		// check for "[]" around the string...
-		if strings.HasPrefix(raw, "[") && strings.HasSuffix(raw, "]") {
-			raw = strings.TrimSuffix(strings.TrimPrefix(raw, "["), "]")
-		}
-
-		return strings.Split(raw, sep), nil
+		return getListEntries(from.String(), sep), nil
 	}
+}
+
+// getListEntries is a helper for the string to map/slice decoders, which all
+// need to check for enclosing "[]" and then split.
+func getListEntries(s string, sep string) []string {
+	if strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]") {
+		s = strings.TrimSuffix(strings.TrimPrefix(s, "["), "]")
+	}
+
+	// strings.Split() will result in a 1-element slice containing the empty
+	// string.  This isn't really what we want... we want an empty slice!
+	if s == "" {
+		return []string{}
+	}
+
+	return strings.Split(s, sep)
 }

@@ -112,7 +112,7 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 		switch val := intf.(type) {
 		case time.Time:
 			// create our own time-parsing flag
-			flags.VarP(decoders.NewTimeValue(time.Time{}, new(time.Time)), l, s, d)
+			flags.VarP(decoders.NewTimeValue(), l, s, d)
 
 		case time.Duration:
 			flags.DurationP(l, s, val, d)

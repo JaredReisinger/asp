@@ -14,7 +14,7 @@ type AnonymousEmbedded struct {
 	EmbeddedInt int
 }
 
-type TestConfig struct {
+type processTestConfig struct {
 	Time            time.Time
 	Duration        time.Duration
 	DurationSlice   []time.Duration
@@ -51,9 +51,9 @@ func newBase(t *testing.T) *aspBase {
 func TestProcessStruct(t *testing.T) {
 	a := newBase(t)
 
-	err := a.processStruct(TestConfig{})
+	err := a.processStruct(processTestConfig{})
 	assert.NoError(t, err)
-	assert.Equal(t, reflect.TypeOf(TestConfig{}), a.baseType)
+	assert.Equal(t, reflect.TypeOf(processTestConfig{}), a.baseType)
 
 	// TODO: check all viper/cobra settings?
 	names := []string{

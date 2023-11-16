@@ -29,3 +29,14 @@ func TestWithoutConfigFlag(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, a.withConfigFlag)
 }
+
+func TestWithDecodeHook(t *testing.T) {
+	a := &aspBase{}
+
+	dummyHook := "HOOK"
+
+	err := WithDecodeHook(dummyHook)(a)
+	assert.NoError(t, err)
+	assert.Equal(t, dummyHook, a.decodeHook)
+
+}

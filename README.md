@@ -85,7 +85,8 @@ func main() {
 func commandHandler(cmd *cobra.Command, args []string) {
     // Extract the `asp.Asp` from the context and get the parsed config.
     a := cmd.Context().Value(asp.ContextKey).(asp.Asp[Config])
-    config := a.Config()
+    config, err := a.Config()
+    cobra.CheckErr(err)
 
     log.Printf("got config: %#v", config)
 }

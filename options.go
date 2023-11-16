@@ -1,5 +1,7 @@
 package asp
 
+import "github.com/mitchellh/mapstructure"
+
 // Option represents an option to the [asp.Attach] method.
 type Option func(*aspBase) error
 
@@ -36,4 +38,15 @@ func WithConfigFlag(a *aspBase) error {
 func WithoutConfigFlag(a *aspBase) error {
 	a.withConfigFlag = false
 	return nil
+}
+
+// WithDecodeHook allows for customization of the default decode hooks used to
+// unmarshal values into the configuration structure. Use
+// [mapstructure.ComposeDecodeHookFunc] to include more than one decode hook,
+// and also see [asp.DefaultDecodeHook] for the default decoders.
+func WithDecodeHook(decodeHook mapstructure.DecodeHookFunc) Option {
+	return func(a *aspBase) error {
+		a.decodeHook = decodeHook
+		return nil
+	}
 }

@@ -3,12 +3,21 @@ package asp
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
-var defaultConfig = TestConfig{}
+type aspTestConfig struct {
+	String   string
+	Time     time.Time
+	Duration time.Duration
+	Bool     bool
+	Int      int
+}
+
+var defaultConfig = aspTestConfig{}
 
 func TestAttach(t *testing.T) {
 	cmd := &cobra.Command{}
@@ -16,7 +25,7 @@ func TestAttach(t *testing.T) {
 	a, err := Attach(cmd, defaultConfig)
 	assert.NoError(t, err)
 
-	aspActual := a.(*asp[TestConfig])
+	aspActual := a.(*asp[aspTestConfig])
 
 	assert.Equal(t, "APP", aspActual.envPrefix)
 	assert.Equal(t, true, aspActual.withConfigFlag)
@@ -38,9 +47,47 @@ func TestAttachWithoutConfigFlag(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	aspActual := a.(*asp[TestConfig])
+	aspActual := a.(*asp[aspTestConfig])
 
 	assert.Equal(t, false, aspActual.withConfigFlag)
+}
+
+func testConfigFiles(t *testing.T, aspActual *asp[aspTestConfig]) {
+	t.Helper()
+
+	var err error
+
+	aspActual.cfgFile = "asp_test_config.yaml"
+	_, err = aspActual.Config()
+	assert.NoError(t, err)
+
+	aspActual.cfgFile = "asp_test_config_bad.yaml"
+	_, err = aspActual.Config()
+	assert.Error(t, err)
+
+	aspActual.cfgFile = "asp_test_config_missing.yaml"
+	_, err = aspActual.Config()
+	assert.Error(t, err)
+}
+
+func TestAttachWithConfigFlag(t *testing.T) {
+	cmd := &cobra.Command{}
+
+	a, err := Attach(
+		cmd, defaultConfig,
+		WithConfigFlag,
+	)
+	assert.NoError(t, err)
+
+	aspActual := a.(*asp[aspTestConfig])
+
+	assert.Equal(t, true, aspActual.withConfigFlag)
+
+	// see what happens without a --config value...
+	_, err = aspActual.Config()
+	assert.NoError(t, err)
+
+	testConfigFiles(t, aspActual)
 }
 
 func TestAttachWithDefaultConfigName(t *testing.T) {
@@ -52,7 +99,7 @@ func TestAttachWithDefaultConfigName(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	aspActual := a.(*asp[TestConfig])
+	aspActual := a.(*asp[aspTestConfig])
 
 	assert.Equal(t, "DEFAULT_CONFIG", aspActual.defaultCfgName)
 
@@ -60,10 +107,7 @@ func TestAttachWithDefaultConfigName(t *testing.T) {
 	_, err = aspActual.Config()
 	assert.NoError(t, err)
 
-	// also see what happens if the --config value is passed...
-	aspActual.cfgFile = "asp_test_config.yaml"
-	_, err = aspActual.Config()
-	assert.NoError(t, err)
+	testConfigFiles(t, aspActual)
 }
 
 func TestAttachWithBogusOption(t *testing.T) {

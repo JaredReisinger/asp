@@ -56,25 +56,33 @@ type Asp[T IncomingConfig] interface {
 	// instance of [Asp] was attached to the command, in case additional Viper
 	// customization is needed.
 	Viper() *viper.Viper
-
-	// Execute(handler func(config T, args []string)) error
-
-	// Debug outputs (via [log.Printf]) some diagnostic information to help
-	// verify what settings/configs have been acquired.
-	Debug()
 }
 
+// DefaultDecodeHook is the default set of decoders that [Asp[T
+// IncomingConfig].Config] uses. See the [WithDecodeHook] option to provide your
+// own list of decoders.
+var DefaultDecodeHook = mapstructure.ComposeDecodeHookFunc(
+	mapstructure.StringToTimeDurationHookFunc(),
+	decoders.StringToTime(),
+	decoders.StringToByteSlice(),
+	decoders.StringToMapStringInt(),
+	decoders.StringToMapStringString(),
+	decoders.StringToSlice(","),
+)
+
 // Attach adds to `cmd` the command-line arguments, and environment variable and
-// configuration file bindings inferred from `config`.  If no `Option`s are
-// provided, it defaults to `WithConfigFlag` and `WithEnvPrefix("APP")`.
+// configuration file bindings inferred from `config`.  If no [Option] arguments
+// are provided, it effectively defaults to [WithConfigFlag],
+// [WithEnvPrefix]("APP"), and [WithDecodeHook]([DefaultDecodeHook]).
 func Attach[T IncomingConfig](cmd *cobra.Command, config T, options ...Option) (Asp[T], error) {
 	vip := viper.New()
 
 	a := &asp[T]{
 		aspBase: aspBase{
-			// config: config,
+			// config:      config,
 			envPrefix:      "APP",
 			withConfigFlag: true,
+			decodeHook:     DefaultDecodeHook,
 			vip:            vip,
 			cmd:            cmd,
 		},
@@ -121,6 +129,7 @@ type aspBase struct {
 	defaultCfgName string
 	envPrefix      string
 	withConfigFlag bool
+	decodeHook     mapstructure.DecodeHookFunc
 
 	vip     *viper.Viper
 	cmd     *cobra.Command
@@ -137,36 +146,12 @@ type asp[T IncomingConfig] struct {
 	aspBase
 }
 
-// func (a *asp[T]) Execute(handler func(config T, args []string)) error {
-// 	// Set up run-handler for the cobra command...
-// 	a.cmd.Run = func(cmd *cobra.Command, args []string) {
-// 		log.Printf("BEFORE (INSIDE): %v", a.vip.AllSettings())
-// 		// TODO: unmarshal the settings into the expected config type!
-// 		cfgVal := reflect.New(a.baseType)
-// 		handler(cfgVal.Interface().(T), args)
-// 		log.Printf("AFTER (INSIDE): %v", a.vip.AllSettings())
-// 	}
-
-// 	log.Printf("BEFORE: %v", a.vip.AllSettings())
-
-// 	// a.cmd.ParseFlags()
-// 	err := a.cmd.Execute()
-// 	log.Printf("error? %v", err)
-
-// 	log.Printf("AFTER: %v", a.vip.AllSettings())
-// 	return err
-// }
-
 func (a *aspBase) Command() *cobra.Command {
 	return a.cmd
 }
 
 func (a *aspBase) Viper() *viper.Viper {
 	return a.vip
-}
-
-func (a *aspBase) Debug() {
-	log.Printf("asp.Debug: %#v", a.vip.AllSettings())
 }
 
 func (a *asp[T]) Config() (*T, error) {
@@ -204,17 +189,7 @@ func (a *asp[T]) Config() (*T, error) {
 		}
 	}
 
-	err = a.vip.Unmarshal(
-		cfg,
-		viper.DecodeHook(
-			mapstructure.ComposeDecodeHookFunc(
-				mapstructure.StringToTimeDurationHookFunc(),
-				decoders.BetterStringToTime(),
-				decoders.StringToByteSlice(),
-				decoders.StringToMapStringInt(),
-				decoders.StringToMapStringString(),
-				decoders.BetterStringToSlice(","),
-			)))
+	err = a.vip.Unmarshal(cfg, viper.DecodeHook(a.decodeHook))
 
 	if err != nil {
 		// TODO (?): create wrapping error?
