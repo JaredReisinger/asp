@@ -2,46 +2,30 @@ package asp
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWithEnvPrefix(t *testing.T) {
 	a := &aspBase{}
 
 	err := WithEnvPrefix("PREFIX")(a)
-	if err != nil {
-		t.Logf("unexpected error: %v", err)
-		t.Fail()
-	}
-
-	if a.envPrefix != "PREFIX" {
-		t.Fail()
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, "PREFIX", a.envPrefix)
 }
 
 func TestWithConfigFlag(t *testing.T) {
 	a := &aspBase{}
 
 	err := WithConfigFlag(a)
-	if err != nil {
-		t.Logf("unexpected error: %v", err)
-		t.Fail()
-	}
-
-	if !a.withConfigFlag {
-		t.Fail()
-	}
+	assert.NoError(t, err)
+	assert.True(t, a.withConfigFlag)
 }
 
 func TestWithoutConfigFlag(t *testing.T) {
 	a := &aspBase{withConfigFlag: true}
 
 	err := WithoutConfigFlag(a)
-	if err != nil {
-		t.Logf("unexpected error: %v", err)
-		t.Fail()
-	}
-
-	if a.withConfigFlag {
-		t.Fail()
-	}
+	assert.NoError(t, err)
+	assert.False(t, a.withConfigFlag)
 }

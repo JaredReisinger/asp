@@ -5,14 +5,8 @@ import (
 	"testing"
 
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 )
-
-func expectBool(t *testing.T, i int, label string, expected bool, actual bool) {
-	if actual != expected {
-		t.Logf("case %d (%s): expected %t, got %t", i, label, expected, actual)
-		t.Fail()
-	}
-}
 
 var defaultConfig = TestConfig{}
 
@@ -20,29 +14,19 @@ func TestAttach(t *testing.T) {
 	cmd := &cobra.Command{}
 
 	a, err := Attach(cmd, defaultConfig)
-	if err != nil {
-		t.Logf("got error: %v", err)
-		t.FailNow()
-	}
+	assert.NoError(t, err)
 
 	aspActual := a.(*asp[TestConfig])
 
-	expect(t, 0, "envPrefix", "APP_", aspActual.envPrefix)
-	expectBool(t, 0, "withConfigFlag", aspActual.withConfigFlag, true)
-	expect(t, 0, "defaultCfgName", "", aspActual.defaultCfgName)
+	assert.Equal(t, "APP_", aspActual.envPrefix)
+	assert.Equal(t, true, aspActual.withConfigFlag)
+	assert.Equal(t, "", aspActual.defaultCfgName)
 
-	if a.Command() != cmd {
-		t.Logf("expected same Commmand")
-		t.Fail()
-	}
-
-	if a.Viper() == nil {
-		t.Logf("expected Viper")
-		t.Fail()
-	}
+	assert.Equal(t, cmd, a.Command())
+	assert.NotNil(t, a.Viper())
 
 	// check debug output...
-	a.Debug()
+	// a.Debug()
 }
 
 func TestAttachWithoutConfigFlag(t *testing.T) {
@@ -52,14 +36,11 @@ func TestAttachWithoutConfigFlag(t *testing.T) {
 		cmd, defaultConfig,
 		WithoutConfigFlag,
 	)
-	if err != nil {
-		t.Logf("got error: %v", err)
-		t.FailNow()
-	}
+	assert.NoError(t, err)
 
 	aspActual := a.(*asp[TestConfig])
 
-	expectBool(t, 0, "withConfigFlag", aspActual.withConfigFlag, false)
+	assert.Equal(t, false, aspActual.withConfigFlag)
 }
 
 func TestAttachWithDefaultConfigName(t *testing.T) {
@@ -69,21 +50,20 @@ func TestAttachWithDefaultConfigName(t *testing.T) {
 		cmd, defaultConfig,
 		WithDefaultConfigName("DEFAULT_CONFIG"),
 	)
-	if err != nil {
-		t.Logf("got error: %v", err)
-		t.FailNow()
-	}
+	assert.NoError(t, err)
 
 	aspActual := a.(*asp[TestConfig])
 
-	expect(t, 0, "defaultCfgName", "DEFAULT_CONFIG", aspActual.defaultCfgName)
+	assert.Equal(t, "DEFAULT_CONFIG", aspActual.defaultCfgName)
 
 	// see what happens without a --config value...
-	aspActual.Config()
+	_, err = aspActual.Config()
+	assert.NoError(t, err)
 
 	// also see what happens if the --config value is passed...
 	aspActual.cfgFile = "asp_test_config.yaml"
-	aspActual.Config()
+	_, err = aspActual.Config()
+	assert.NoError(t, err)
 }
 
 func TestAttachWithBogusOption(t *testing.T) {
@@ -98,14 +78,8 @@ func TestAttachWithBogusOption(t *testing.T) {
 		cmd, defaultConfig,
 		bogusOption,
 	)
-
-	if !errors.Is(err, bogusError) {
-		t.Fail()
-	}
-
-	if a != nil {
-		t.Fail()
-	}
+	assert.ErrorIs(t, err, bogusError)
+	assert.Nil(t, a)
 }
 
 func TestAttachWithUnsupportedConfig(t *testing.T) {
@@ -116,23 +90,18 @@ func TestAttachWithUnsupportedConfig(t *testing.T) {
 	}{}
 
 	_, err := Attach(cmd, badConfig)
-	if !errors.Is(err, ErrConfigFieldUnsupported) {
-		t.Fail()
-	}
-
+	assert.ErrorIs(t, err, ErrConfigFieldUnsupported)
 }
 
 func TestConfigResults(t *testing.T) {
 	cmd := &cobra.Command{}
 
 	a, err := Attach(cmd, defaultConfig)
-	if err != nil {
-		t.Logf("got error: %v", err)
-		t.FailNow()
-	}
+	assert.NoError(t, err)
 
-	cfg := a.Config()
+	cfg, err := a.Config()
+	assert.NoError(t, err)
 
 	// TODO: need more/better testing here!
-	expect(t, 0, "misc", "", cfg.String)
+	assert.Equal(t, "", cfg.String)
 }

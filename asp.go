@@ -42,8 +42,8 @@ var ContextKey = contextKey{}
 // though!)
 type Asp[T IncomingConfig] interface {
 	// Config returns the aggregated configuration values, pulling from CLI
-	// flags, environment variables, and implicit or explict config file.
-	Config() *T
+	// flags, environment variables, and implicit or explicit config file.
+	Config() (*T, error)
 
 	// Command provides access to the [cobra.Command] that this instance of
 	// [Asp] was attached to, in case additional Command customization is
@@ -167,7 +167,7 @@ func (a *aspBase) Debug() {
 	log.Printf("asp.Debug: %#v", a.vip.AllSettings())
 }
 
-func (a *asp[T]) Config() *T {
+func (a *asp[T]) Config() (*T, error) {
 	// Before reading the config, check to see if there was a `--config` option
 	// that specifies a particular config file!
 	expectCfgFile := false
@@ -190,12 +190,15 @@ func (a *asp[T]) Config() *T {
 		case viper.ConfigFileNotFoundError:
 		case *viper.ConfigFileNotFoundError:
 			if expectCfgFile {
-				log.Fatalf("specified config file %q not found", a.cfgFile)
-			} else {
-				log.Printf("no config file found... perhaps there are environment variables")
+				// TODO: create wrapping error?
+				log.Printf("specified config file %q not found", a.cfgFile)
+				return nil, err
 			}
+			// log.Printf("no config file found... perhaps there are environment variables")
 		default:
-			log.Fatalf("read config error: (%T) %s", err, err.Error())
+			// TODO (?): create wrapping error?
+			log.Printf("read config error: (%T) %s", err, err.Error())
+			return nil, err
 		}
 	}
 
@@ -212,9 +215,11 @@ func (a *asp[T]) Config() *T {
 			)))
 
 	if err != nil {
-		log.Fatalf("unmarshal config error: %+v", err)
+		// TODO (?): create wrapping error?
+		log.Printf("unmarshal config error: %+v", err)
+		return nil, err
 	}
 
 	// log.Printf("returning merged config: %+v", cfg)
-	return cfg
+	return cfg, nil
 }

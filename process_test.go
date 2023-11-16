@@ -1,13 +1,13 @@
 package asp
 
 import (
-	"errors"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 type AnonymousEmbedded struct {
@@ -52,13 +52,8 @@ func TestProcessStruct(t *testing.T) {
 	a := newBase(t)
 
 	err := a.processStruct(TestConfig{})
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
-	if a.baseType != reflect.TypeOf(TestConfig{}) {
-		t.Error("unexpected type")
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, reflect.TypeOf(TestConfig{}), a.baseType)
 
 	// TODO: check all viper/cobra settings?
 	names := []string{
@@ -81,9 +76,7 @@ func TestProcessStruct(t *testing.T) {
 	}
 	for _, n := range names {
 		f := a.cmd.PersistentFlags().Lookup(n)
-		if f == nil {
-			t.Errorf("expected flag for %q, got nil", n)
-		}
+		assert.NotNil(t, f, n)
 	}
 }
 
@@ -92,18 +85,14 @@ func TestProcessStructInnerErrors(t *testing.T) {
 
 	// check for expected errors...
 	err := a.processStructInner(nil, attrs{})
-	if !errors.Is(err, ErrConfigMustBeStruct) {
-		t.Error("expected error")
-	}
+	assert.ErrorIs(t, err, ErrConfigMustBeStruct)
 
 	cfgWithBadMember := struct {
 		BadMember *int
 	}{}
 
 	err = a.processStructInner(cfgWithBadMember, attrs{})
-	if !errors.Is(err, ErrConfigFieldUnsupported) {
-		t.Error("expected error")
-	}
+	assert.ErrorIs(t, err, ErrConfigFieldUnsupported)
 
 	cfgWithBadNestedMember := struct {
 		BadNest struct {
@@ -112,9 +101,7 @@ func TestProcessStructInnerErrors(t *testing.T) {
 	}{}
 
 	err = a.processStructInner(cfgWithBadNestedMember, attrs{})
-	if !errors.Is(err, ErrConfigFieldUnsupported) {
-		t.Error("expected error")
-	}
+	assert.ErrorIs(t, err, ErrConfigFieldUnsupported)
 }
 
 func TestProcessStructInnerAttributes(t *testing.T) {
@@ -135,9 +122,7 @@ func TestProcessStructInnerAttributes(t *testing.T) {
 	}
 
 	err := a.processStructInner(Config{}, attrs{})
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 
 	flags := a.cmd.PersistentFlags()
 
@@ -156,14 +141,8 @@ func TestProcessStructInnerAttributes(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			if flags.Lookup(name) != nil {
-				t.Errorf("did not expect flag for %q, got one", name)
-			}
-
-			if flags.Lookup(long) == nil {
-				t.Errorf("expect flag for tag name %q, got nil", long)
-			}
-
+			assert.Nil(t, flags.Lookup(name))
+			assert.NotNil(t, flags.Lookup(long))
 		})
 	}
 }

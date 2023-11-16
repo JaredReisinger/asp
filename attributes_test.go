@@ -7,13 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func expect(t *testing.T, i int, label string, expected string, actual string) {
-	if actual != expected {
-		t.Logf("case %d (%s): expected %q, got %q", i, label, expected, actual)
-		t.Fail()
-	}
-}
-
 func TestGetAttributes(t *testing.T) {
 	t.Parallel()
 
