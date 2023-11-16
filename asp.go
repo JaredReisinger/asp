@@ -64,14 +64,14 @@ type Asp[T IncomingConfig] interface {
 
 // Attach adds to `cmd` the command-line arguments, and environment variable and
 // configuration file bindings inferred from `config`.  If no `Option`s are
-// provided, it defaults to `WithConfigFlag` and `WithEnvPrefix("APP_")`.
+// provided, it defaults to `WithConfigFlag` and `WithEnvPrefix("APP")`.
 func Attach[T IncomingConfig](cmd *cobra.Command, config T, options ...Option) (Asp[T], error) {
 	vip := viper.New()
 
 	a := &asp[T]{
 		aspBase: aspBase{
 			// config: config,
-			envPrefix:      "APP_",
+			envPrefix:      "APP",
 			withConfigFlag: true,
 			vip:            vip,
 			cmd:            cmd,

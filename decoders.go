@@ -9,7 +9,7 @@ package asp
 //
 // for example:
 //   type Config struct {
-//     Host string `asp:"host,h,APP_HOST,The host to use."`
+//     Host string `asp:"host,h,HOST,The host to use."`
 //   }
 
 import (

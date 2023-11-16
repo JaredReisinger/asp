@@ -41,7 +41,7 @@ func newBase(t *testing.T) *aspBase {
 	t.Helper()
 	return &aspBase{
 		// config: config,
-		// envPrefix:      "APP_",
+		// envPrefix:      "APP",
 		// withConfigFlag: true,
 		cmd: &cobra.Command{},
 		vip: viper.New(),

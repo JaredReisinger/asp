@@ -18,7 +18,7 @@ func TestAttach(t *testing.T) {
 
 	aspActual := a.(*asp[TestConfig])
 
-	assert.Equal(t, "APP_", aspActual.envPrefix)
+	assert.Equal(t, "APP", aspActual.envPrefix)
 	assert.Equal(t, true, aspActual.withConfigFlag)
 	assert.Equal(t, "", aspActual.defaultCfgName)
 

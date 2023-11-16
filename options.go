@@ -15,7 +15,7 @@ func WithDefaultConfigName(cfgName string) Option {
 }
 
 // WithEnvPrefix specifies the prefix to use with environment variables.  If not
-// passed to Attach(), the prefix "APP_" is assumed.
+// passed to Attach(), the prefix "APP" is assumed.
 func WithEnvPrefix(prefix string) Option {
 	return func(a *aspBase) error {
 		a.envPrefix = prefix
