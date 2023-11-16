@@ -3,6 +3,21 @@
 _All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
 
 
+# [0.2.0](https://github.com/JaredReisinger/asp/compare/v0.1.0...v0.2.0) (2023-11-16)
+
+
+### Bug Fixes
+
+* change default `APP_` prefix to `APP` ([37db308](https://github.com/JaredReisinger/asp/commit/37db308f7460b07428491bece3cabc9e5bd6e73c))
+* tepmplated description strings ([e23801b](https://github.com/JaredReisinger/asp/commit/e23801b5029aebc827891848eb62fbec9f871f34))
+
+
+### Features
+
+* add error to Config() return ([df6ad9a](https://github.com/JaredReisinger/asp/commit/df6ad9acee9747f7d0df09e18ee35d00cdd3d50c))
+* give conrol to outer struct ([3d8cf13](https://github.com/JaredReisinger/asp/commit/3d8cf1346842f340055be876dcb9a3e5cf707886))
+* simplify attach/get experience ([3b92fbe](https://github.com/JaredReisinger/asp/commit/3b92fbedb959e2998c1b53d37b3c7b2dbdab8b4d))
+
 # [0.1.0](https://github.com/JaredReisinger/asp/compare/v0.0.2...v0.1.0) (2023-01-21)
 
 
