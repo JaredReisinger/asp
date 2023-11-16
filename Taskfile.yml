@@ -58,13 +58,15 @@ tasks:
     cmds:
       - go vet ./...
 
-  help:
+  example:help:
     desc: Quick-run the example to show help
+    aliases: [help]
     cmds:
       - go run example/main.go --help
 
-  run:
+  example:run:
     desc: Run the example
+    aliases: [run]
     cmds:
       - go run example/main.go
 

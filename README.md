@@ -67,25 +67,19 @@ func main() {
         Run: commandHandler,
     }
 
-    a, err := asp.Attach(
+    err := asp.Attach(
         cmd, defaults,
         asp.WithDefaultConfigName("asp-example"),
     )
     cobra.CheckErr(err)
 
-    // Ensure the `asp.Asp` value is available to the command handler when it
-    // runs.  You can also store the returned value in a global, but using
-    // context helps when you have more than one command with differing config
-    // structures.
-    err = cmd.ExecuteContext(
-        context.WithValue(context.Background(), asp.ContextKey, a))
+    err = cmd.Execute()
     cobra.CheckErr(err)
 }
 
 func commandHandler(cmd *cobra.Command, args []string) {
-    // Extract the `asp.Asp` from the context and get the parsed config.
-    a := cmd.Context().Value(asp.ContextKey).(asp.Asp[Config])
-    config, err := a.Config()
+    // get the config using the asp.Asp instance attached to cmd
+    config, err := asp.Get[Config](cmd)
     cobra.CheckErr(err)
 
     log.Printf("got config: %#v", config)

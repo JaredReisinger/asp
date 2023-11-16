@@ -13,8 +13,8 @@ package asp
 //   }
 
 import (
-	// "builtin"
-
+	"context"
+	"errors"
 	"log" // REVIEW: maybe update to log/slog, go 1.21?
 	"reflect"
 
@@ -25,12 +25,14 @@ import (
 	"github.com/jaredreisinger/asp/decoders"
 )
 
-// IncomingConfig is a placeholder generic type that exists only to allow us to
-// define our inner and exposed value as strongly-typed to the originating
+// Config is a placeholder generic type that exists only to allow us to define
+// our inner and exposed value as strongly-typed to the originating
 // configuration struct.
-type IncomingConfig interface {
+type Config interface {
 	interface{}
 }
+
+var ErrConfigTypeMismatch = errors.New("the asp.Asp instance uses a different type than was requested")
 
 type contextKey struct{}
 
@@ -42,7 +44,7 @@ var ContextKey = contextKey{}
 // command-line/config/environment, as well as lower-level access to the created
 // viper instance and cobra command.  (In most cases these should not be needed,
 // though!)
-type Asp[T IncomingConfig] interface {
+type Asp[T Config] interface {
 	// Config returns the aggregated configuration values, pulling from CLI
 	// flags, environment variables, and implicit or explicit config file.
 	Config() (*T, error)
@@ -70,11 +72,23 @@ var DefaultDecodeHook = mapstructure.ComposeDecodeHookFunc(
 	decoders.StringToSlice(","),
 )
 
-// Attach adds to `cmd` the command-line arguments, and environment variable and
-// configuration file bindings inferred from `config`.  If no [Option] arguments
-// are provided, it effectively defaults to [WithConfigFlag],
-// [WithEnvPrefix]("APP"), and [WithDecodeHook]([DefaultDecodeHook]).
-func Attach[T IncomingConfig](cmd *cobra.Command, config T, options ...Option) (Asp[T], error) {
+// Attach[T] adds to a [cobra.Command] the command-line arguments, and environment
+// variable and configuration file bindings inferred from `configDefaults`.  If
+// no [Option] arguments are provided, it effectively defaults to
+// [WithConfigFlag], [WithEnvPrefix]("APP"), and
+// [WithDecodeHook]([DefaultDecodeHook]).
+//
+// Note that the [cobra.Command]'s PersistentPreRun is set to stash away the
+// [Asp[T]] instance, which the [Get[T]] method later makes use of.
+func Attach[T Config](cmd *cobra.Command, configDefaults T, options ...Option) error {
+	_, err := AttachInstance(cmd, configDefaults, options...)
+	return err
+}
+
+// AttachInstance[T] is identical to [Attach[T]], but also returns the [Asp[T]]
+// instance itself, in case the default context-stashing doesn't suit your
+// needs.
+func AttachInstance[T Config](cmd *cobra.Command, configDefaults T, options ...Option) (Asp[T], error) {
 	vip := viper.New()
 
 	a := &asp[T]{
@@ -103,7 +117,7 @@ func Attach[T IncomingConfig](cmd *cobra.Command, config T, options ...Option) (
 		cmd.PersistentFlags().StringVar(&a.cfgFile, "config", "", "configuration file to load")
 	}
 
-	err = a.processStruct(config)
+	err = a.processStruct(configDefaults)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +131,28 @@ func Attach[T IncomingConfig](cmd *cobra.Command, config T, options ...Option) (
 		vip.AddConfigPath("/etc")
 	}
 
+	// In addition to setting up flags and config, also seed a pre-run on the
+	// command to ensure the context is available
+	cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		ctx := cmd.Context()
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		cmd.SetContext(context.WithValue(ctx, ContextKey, a))
+	}
+
 	return a, nil
+}
+
+// Get[T] retrieves the asp instance from the [cobra.Command]'s context and gets
+// the current configuration from flags, environment variables, and config
+// files.
+func Get[T Config](cmd *cobra.Command) (*T, error) {
+	a, ok := cmd.Context().Value(ContextKey).(Asp[T])
+	if !ok {
+		return nil, ErrConfigTypeMismatch
+	}
+	return a.Config()
 }
 
 // We use aspBase to represent everything *except* the generic-type-specific
@@ -142,7 +177,7 @@ type aspBase struct {
 // called, but it "pollutes" all usage of the asp instance, when the *only* call
 // that really benefits from it is asp.Config().  I *really* like not having to
 // explicitly provide the type in the .Config() call,
-type asp[T IncomingConfig] struct {
+type asp[T Config] struct {
 	aspBase
 }
 

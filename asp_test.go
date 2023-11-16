@@ -19,10 +19,10 @@ type aspTestConfig struct {
 
 var defaultConfig = aspTestConfig{}
 
-func TestAttach(t *testing.T) {
+func TestAttachInstance(t *testing.T) {
 	cmd := &cobra.Command{}
 
-	a, err := Attach(cmd, defaultConfig)
+	a, err := AttachInstance(cmd, defaultConfig)
 	assert.NoError(t, err)
 
 	aspActual := a.(*asp[aspTestConfig])
@@ -33,15 +33,12 @@ func TestAttach(t *testing.T) {
 
 	assert.Equal(t, cmd, a.Command())
 	assert.NotNil(t, a.Viper())
-
-	// check debug output...
-	// a.Debug()
 }
 
-func TestAttachWithoutConfigFlag(t *testing.T) {
+func TestAttachInstanceWithoutConfigFlag(t *testing.T) {
 	cmd := &cobra.Command{}
 
-	a, err := Attach(
+	a, err := AttachInstance(
 		cmd, defaultConfig,
 		WithoutConfigFlag,
 	)
@@ -70,10 +67,10 @@ func testConfigFiles(t *testing.T, aspActual *asp[aspTestConfig]) {
 	assert.Error(t, err)
 }
 
-func TestAttachWithConfigFlag(t *testing.T) {
+func TestAttachInstanceWithConfigFlag(t *testing.T) {
 	cmd := &cobra.Command{}
 
-	a, err := Attach(
+	a, err := AttachInstance(
 		cmd, defaultConfig,
 		WithConfigFlag,
 	)
@@ -90,10 +87,10 @@ func TestAttachWithConfigFlag(t *testing.T) {
 	testConfigFiles(t, aspActual)
 }
 
-func TestAttachWithDefaultConfigName(t *testing.T) {
+func TestAttachInstanceWithDefaultConfigName(t *testing.T) {
 	cmd := &cobra.Command{}
 
-	a, err := Attach(
+	a, err := AttachInstance(
 		cmd, defaultConfig,
 		WithDefaultConfigName("DEFAULT_CONFIG"),
 	)
@@ -110,7 +107,7 @@ func TestAttachWithDefaultConfigName(t *testing.T) {
 	testConfigFiles(t, aspActual)
 }
 
-func TestAttachWithBogusOption(t *testing.T) {
+func TestAttachInstanceWithBogusOption(t *testing.T) {
 	cmd := &cobra.Command{}
 
 	bogusError := errors.New("bogus")
@@ -118,7 +115,7 @@ func TestAttachWithBogusOption(t *testing.T) {
 		return bogusError
 	}
 
-	a, err := Attach(
+	a, err := AttachInstance(
 		cmd, defaultConfig,
 		bogusOption,
 	)
@@ -126,21 +123,21 @@ func TestAttachWithBogusOption(t *testing.T) {
 	assert.Nil(t, a)
 }
 
-func TestAttachWithUnsupportedConfig(t *testing.T) {
+func TestAttachInstanceWithUnsupportedConfig(t *testing.T) {
 	cmd := &cobra.Command{}
 
 	badConfig := struct {
 		BadMember *int // we don't support pointer members!
 	}{}
 
-	_, err := Attach(cmd, badConfig)
+	_, err := AttachInstance(cmd, badConfig)
 	assert.ErrorIs(t, err, ErrConfigFieldUnsupported)
 }
 
 func TestConfigResults(t *testing.T) {
 	cmd := &cobra.Command{}
 
-	a, err := Attach(cmd, defaultConfig)
+	a, err := AttachInstance(cmd, defaultConfig)
 	assert.NoError(t, err)
 
 	cfg, err := a.Config()
@@ -148,4 +145,35 @@ func TestConfigResults(t *testing.T) {
 
 	// TODO: need more/better testing here!
 	assert.Equal(t, "", cfg.String)
+}
+
+func TestAttachedCommand(t *testing.T) {
+	cmd := &cobra.Command{
+		Run: func(cmd *cobra.Command, args []string) {
+			cfg, err := Get[aspTestConfig](cmd)
+			assert.NoError(t, err)
+			assert.Equal(t, "test", cfg.String)
+		},
+	}
+
+	err := Attach(cmd, defaultConfig)
+	assert.NoError(t, err)
+
+	cmd.SetArgs([]string{"--string", "test"})
+	cmd.Execute()
+}
+
+func TestAttachedCommandWrongType(t *testing.T) {
+	cmd := &cobra.Command{
+		Run: func(cmd *cobra.Command, args []string) {
+			cfg, err := Get[struct{}](cmd)
+			assert.ErrorIs(t, err, ErrConfigTypeMismatch)
+			assert.Nil(t, cfg)
+		},
+	}
+
+	err := Attach(cmd, defaultConfig)
+	assert.NoError(t, err)
+
+	cmd.Execute()
 }
