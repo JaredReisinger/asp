@@ -25,7 +25,7 @@ func getAttributes(f reflect.StructField) attrs {
 		long:  strcase.ToKebab(f.Name),
 		short: "",
 		env:   strings.ToUpper(f.Name),
-		desc:  "sets the {{.Name}} value (or use {{.EnvName}})",
+		desc:  "sets the {{.Name}} value",
 	}
 
 	// now go through the possible tags and allow them to override

@@ -2,9 +2,12 @@ package asp
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"reflect"
+	"regexp"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/jaredreisinger/asp/decoders"
@@ -56,7 +59,6 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 	fields := reflect.VisibleFields(structVal.Type())
 	// log.Printf("fields: %#v", fields)
 
-	var err error
 	for _, f := range fields {
 		// We deal with anonymous (embedded) structs by *not* updating the
 		// parentCanonical/parentEnv strings when recursing.  We also need to
@@ -68,14 +70,42 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 			continue
 		}
 
-		// The attrDescNoEnv/attrDesc bifurcation exists because *originally*
-		// there was no string->map[string]string decoding support, and thus no
-		// way to represent maps in an environment variable.  This has been
-		// fixed, but it's still a useful concept to have the field description
-		// with and without the env-var notation, just in case.
 		childAttrs := getAttributes(f)
-		// attrDesc := fmt.Sprintf("%s (or use %s)", attrDescNoEnv, attrEnv)
 		joinedAttrs := parentAttrs.join(childAttrs)
+
+		// Special handling for the description: if neither {{.Env}} or
+		// {{.NoEnv}} appears in the string, we append a "(env: {{Env}})"
+		// suffix. Unless, of course, the description has been explicitly
+		// omitted (but why, oh why, would you do that?)
+		desc := joinedAttrs.desc
+		if desc != "" {
+			re := regexp.MustCompile(`\{\{\w*\.(?:No)?Env\w*`)
+			if !re.Match([]byte(desc)) {
+				desc = fmt.Sprintf("%s (env: {{.Env}})", desc)
+			}
+
+			// We allow the description attribute to include template values that
+			// we fill in based on the calculated name, env, etc.
+			tmpl, err := template.New("desc").Parse(desc)
+			if err != nil {
+				return err
+			}
+			descBuilder := &strings.Builder{}
+			err = tmpl.Execute(descBuilder, map[string]string{
+				"Name":  joinedAttrs.name,
+				"Long":  joinedAttrs.long,
+				"Short": joinedAttrs.short,
+				"Env":   joinedAttrs.env,
+				"NoEnv": "",
+			})
+			if err != nil {
+				return err
+			}
+			desc = descBuilder.String()
+		}
+
+		// use shortened names purely for concision...
+		l, s, d := joinedAttrs.long, joinedAttrs.short, desc
 
 		// Rather than setting handled to true in our myriad cases, we default
 		// to true, and make sure to set it to false in our default/unhandled
@@ -94,11 +124,9 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 		// ``` flag := flags.AsP(l, s, d)
 		// flag.IntP(v2.Int()) ```
 
-		// WAIT!!!!!! can we use flags.VarP()?
+		// We *could* use flags.VarP() directly, but that doesn't have the
+		// flags.Value-creating helpers, and we need those.
 
-		// use shortened names purely for concision...
-		l, s, d := joinedAttrs.long, joinedAttrs.short, joinedAttrs.desc
-		// fieldVal := structVal.Field(i)
 		fieldVal := structVal.FieldByIndex(f.Index)
 		intf := fieldVal.Interface()
 
@@ -169,7 +197,7 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 					recursiveAttrs = parentAttrs
 				}
 
-				err = a.processStructInner(intf, recursiveAttrs)
+				err := a.processStructInner(intf, recursiveAttrs)
 				if err != nil {
 					return err
 				}
@@ -194,7 +222,7 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 			// parent paths pretty quickly!
 			vip.SetDefault(joinedAttrs.name, intf)
 
-			err = vip.BindPFlag(joinedAttrs.name, flags.Lookup(joinedAttrs.long))
+			err := vip.BindPFlag(joinedAttrs.name, flags.Lookup(joinedAttrs.long))
 			if err != nil {
 				return err
 			}

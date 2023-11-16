@@ -95,13 +95,13 @@ Usage:
 Flags:
       --config string                        configuration file to load
   -h, --help                                 help for this command
-      --many-numbers ints                    sets the ManyNumbers value (or use APP_MANYNUMBERS)
-      --map-string-int stringToInt           sets the MapStringInt value (or use APP_MAPSTRINGINT) (default [])
-      --map-string-string stringToString     sets the MapStringString value (or use APP_MAPSTRINGSTRING) (default [])
-      --some-flag                            sets the SomeFlag value (or use APP_SOMEFLAG)
-      --some-value string                    sets the SomeValue value (or use APP_SOMEVALUE) (default "DEFAULT STRING!")
-      --sub-section-names-like-this string   sets the SubSection.NamesLikeThis value (or use APP_SUBSECTION_NAMESLIKETHIS)
-  -v, --verbose                              get noisy (or use APP_VERBOSE)
+      --many-numbers ints                    sets the ManyNumbers value (env: APP_MANYNUMBERS)
+      --map-string-int stringToInt           sets the MapStringInt value (env: APP_MAPSTRINGINT) (default [])
+      --map-string-string stringToString     sets the MapStringString value (env: APP_MAPSTRINGSTRING) (default [])
+      --some-flag                            sets the SomeFlag value (env: APP_SOMEFLAG)
+      --some-value string                    sets the SomeValue value (env: APP_SOMEVALUE) (default "DEFAULT STRING!")
+      --sub-section-names-like-this string   sets the SubSection.NamesLikeThis value (env: APP_SUBSECTION_NAMESLIKETHIS)
+  -v, --verbose                              get noisy (env: APP_VERBOSE)
 ```
 
 Simply by calling `asp.Attach()`, you’ve gotten the CLI flags, along with environment variable support _and_ config file parsing. The tagging on the `Config.Verbose` member alters the default help string and adds the `-v` shorthand. Try running this tool using variations of flags and environment values (and/or config!), and you will see the resulting config (line-breaks and whitespace added for legibility):
@@ -128,12 +128,12 @@ When processing your configuration struct, `asp` turns `NamesLikeThis` into CLI 
 
 You can provide your own values for these with the following tags:
 
-| tag         | meaning                                                                                                          |
-| ----------- | ---------------------------------------------------------------------------------------------------------------- |
-| `asp.long`  | the long `--some-name` style CLI flag                                                                            |
-| `asp.short` | the short `-n` style CLI flag                                                                                    |
-| `asp.env`   | the environment variable (prepended with envPrefix; `APP_` by default)                                           |
-| `asp.desc`  | the help text to show for the flag; any given value is automatically suffixed with the environment variable name |
+| tag         | meaning                                                                                                                                                                                                                                                                                                                                                                    |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `asp.long`  | long `--some-name` style CLI flag                                                                                                                                                                                                                                                                                                                                          |
+| `asp.short` | short `-n` style CLI flag                                                                                                                                                                                                                                                                                                                                                  |
+| `asp.env`   | environment variable (prepended with envPrefix; `APP` by default)                                                                                                                                                                                                                                                                                                          |
+| `asp.desc`  | help text to show for the flag; processed as a template with `{{.Name}}`, `{{.Long}}`, `{{.Short}}`, `{{.Env}}`, and `{{.NoEnv}}` replacement values. If neither `{{.Env}}` nor `{{.NoEnv}}` is present in the string "` (env: {{.Env}})`" is automatically added to the end. (`{{.NoEnv}}` resolves to an empty string; it exists to prevent the automatic env addition.) |
 
 You can see an example of the `asp.short` and `asp.desc` tags on the `Verbose` member in the above (Getting started)[#getting-started] section.
 
@@ -206,7 +206,7 @@ It’s reasonable to want to compose app configuration out of sub-parts, and emb
 The examples above will result in:
 
 ```text
---first-name string   sets the FirstName value (or use APP_FIRSTNAME) (default "Mia")
---last-name string    sets the LastName value (or use APP_LASTNAME)
---more string         sets the More value (or use APP_MORE)
+--first-name string   sets the FirstName value (env: APP_FIRSTNAME) (default "Mia")
+--last-name string    sets the LastName value (env: APP_LASTNAME)
+--more string         sets the More value (env: APP_MORE)
 ```

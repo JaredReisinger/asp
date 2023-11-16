@@ -10,7 +10,7 @@ import (
 func TestGetAttributes(t *testing.T) {
 	t.Parallel()
 
-	defaultDesc := "sets the {{.Name}} value (or use {{.EnvName}})"
+	defaultDesc := "sets the {{.Name}} value"
 	// fields: fieldName, tag, name, long, short, env, desc
 	cases := map[string][7]string{
 		// "Ex" for "Example" is enough to catch case changes
