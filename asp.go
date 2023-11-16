@@ -21,6 +21,8 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/jaredreisinger/asp/decoders"
 )
 
 // IncomingConfig is a placeholder generic type that exists only to allow us to
@@ -207,11 +209,11 @@ func (a *asp[T]) Config() (*T, error) {
 		viper.DecodeHook(
 			mapstructure.ComposeDecodeHookFunc(
 				mapstructure.StringToTimeDurationHookFunc(),
-				betterStringToTime(),
-				stringToByteSlice(),
-				stringToMapStringInt(),
-				stringToMapStringString(),
-				betterStringToSlice(","),
+				decoders.BetterStringToTime(),
+				decoders.StringToByteSlice(),
+				decoders.StringToMapStringInt(),
+				decoders.StringToMapStringString(),
+				decoders.BetterStringToSlice(","),
 			)))
 
 	if err != nil {

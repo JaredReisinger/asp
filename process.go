@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/jaredreisinger/asp/decoders"
 )
 
 var (
@@ -110,7 +112,7 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 		switch val := intf.(type) {
 		case time.Time:
 			// create our own time-parsing flag
-			flags.VarP(newTimeValue(time.Time{}, new(time.Time)), l, s, d)
+			flags.VarP(decoders.NewTimeValue(time.Time{}, new(time.Time)), l, s, d)
 
 		case time.Duration:
 			flags.DurationP(l, s, val, d)

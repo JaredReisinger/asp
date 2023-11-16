@@ -1,4 +1,4 @@
-package asp
+package decoders
 
 import (
 	"reflect"
@@ -11,7 +11,7 @@ import (
 func TestBetterStringToTime(t *testing.T) {
 	t.Parallel()
 
-	fn := betterStringToTime()
+	fn := BetterStringToTime()
 
 	isoDatetime := "2022-01-02T03:04:05.666-07:00"
 
@@ -55,7 +55,7 @@ func TestBetterStringToTime(t *testing.T) {
 func TestStringToByteSlice(t *testing.T) {
 	t.Parallel()
 
-	fn := stringToByteSlice()
+	fn := StringToByteSlice()
 
 	cases := map[string]struct {
 		input    interface{}
@@ -92,7 +92,7 @@ func TestStringToByteSlice(t *testing.T) {
 func TestStringToMapStringInt(t *testing.T) {
 	t.Parallel()
 
-	fn := stringToMapStringInt()
+	fn := StringToMapStringInt()
 
 	expected := map[string]int{
 		"key1": 1,
@@ -130,7 +130,7 @@ func TestStringToMapStringInt(t *testing.T) {
 	}
 }
 func TestStringToMapStringString(t *testing.T) {
-	fn := stringToMapStringString()
+	fn := StringToMapStringString()
 
 	expected := map[string]string{
 		"key1": "value1",
@@ -171,7 +171,7 @@ func TestStringToMapStringString(t *testing.T) {
 func TestBetterStringToSlice(t *testing.T) {
 	t.Parallel()
 
-	fn := betterStringToSlice(",")
+	fn := BetterStringToSlice(",")
 
 	expected := []string{"one", "two"}
 

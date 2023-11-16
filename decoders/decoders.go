@@ -1,4 +1,4 @@
-package asp
+package decoders
 
 // We want to encourage the best behavior by making it as easy as possible to
 // provide all of the setting variants:
@@ -24,8 +24,8 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// betterStringToTime handles empty strings as zero time
-func betterStringToTime() mapstructure.DecodeHookFuncType {
+// BetterStringToTime handles empty strings as zero time
+func BetterStringToTime() mapstructure.DecodeHookFuncType {
 	return func(f reflect.Type, t reflect.Type, data interface{}) (
 		interface{}, error) {
 		// log.Printf("attempting to convert string to time? %v --> %v", f, t)
@@ -42,7 +42,7 @@ func betterStringToTime() mapstructure.DecodeHookFuncType {
 	}
 }
 
-func stringToByteSlice() mapstructure.DecodeHookFuncValue {
+func StringToByteSlice() mapstructure.DecodeHookFuncValue {
 	return func(from reflect.Value, to reflect.Value) (interface{}, error) {
 		// log.Printf("attempting to convert string to byte slice? %v", from.Interface())
 		if from.Kind() != reflect.String ||
@@ -56,7 +56,7 @@ func stringToByteSlice() mapstructure.DecodeHookFuncValue {
 	}
 }
 
-func stringToMapStringInt() mapstructure.DecodeHookFuncValue {
+func StringToMapStringInt() mapstructure.DecodeHookFuncValue {
 	return func(from reflect.Value, to reflect.Value) (interface{}, error) {
 		// log.Printf("attempting to convert string to map[string]int? %v", from.Interface())
 		if from.Kind() != reflect.String ||
@@ -92,7 +92,7 @@ func stringToMapStringInt() mapstructure.DecodeHookFuncValue {
 	}
 }
 
-func stringToMapStringString() mapstructure.DecodeHookFuncValue {
+func StringToMapStringString() mapstructure.DecodeHookFuncValue {
 	return func(from reflect.Value, to reflect.Value) (interface{}, error) {
 		// log.Printf("attempting to convert string to map[string]string? %v", from.Interface())
 		if from.Kind() != reflect.String ||
@@ -118,10 +118,10 @@ func stringToMapStringString() mapstructure.DecodeHookFuncValue {
 	}
 }
 
-// betterStringToSlice improves on mapstructure's StringToSliceHookFunc
+// BetterStringToSlice improves on mapstructure's StringToSliceHookFunc
 // by checking for a wrapping "[" and "]" which sometimes happens during flag
 // serialization.
-func betterStringToSlice(sep string) mapstructure.DecodeHookFuncKind {
+func BetterStringToSlice(sep string) mapstructure.DecodeHookFuncKind {
 	return func(f reflect.Kind, t reflect.Kind, data interface{}) (
 		interface{}, error) {
 		if f != reflect.String || t != reflect.Slice {

@@ -1,4 +1,4 @@
-package asp
+package decoders
 
 import (
 	"testing"

@@ -1,4 +1,4 @@
-package asp
+package decoders
 
 import (
 	"time"
@@ -13,7 +13,7 @@ var (
 	timeNow = time.Now // alias to enable testing
 )
 
-func newTimeValue(val time.Time, p *time.Time) *timeValue {
+func NewTimeValue(val time.Time, p *time.Time) *timeValue {
 	*p = val
 	return (*timeValue)(p)
 }
