@@ -21,7 +21,7 @@ Flags:
       --use-viper             sets the viper value (env: APP_USEVIPER)
 ```
 
-... we can see that the flag descriptions aren't quite what the original implementation had, nor are there any short flag name.  We can fix these with the asp tags:
+…we can see that the flag descriptions aren’t quite what the original implementation had, nor are there any short flag names. We can fix these with asp tags:
 
 ```go
 type rootConfig struct {
@@ -56,7 +56,7 @@ If you are consistently providing most or all of the values, the `asp` tag is a 
 
 ### `asp`
 
-The “all the tags” tag, `asp:""` allows you to specify the long, short, env, and desc values, separated by commas. The "explicit" tags always take precedence, but any non-empty portion of `asp` takes precedence over the default fallback values. To _omit_ a value, the explicit attribute tag must be used.
+The “all the tags” tag, `asp:""` allows you to specify the long, short, env, and desc values, separated by commas. The "explicit" tags always take precedence, but any non-empty portions of `asp` take precedence over the default fallback values. To _omit_ a value, the explicit attribute tag must be used.
 
 ### `asp.desc`
 
