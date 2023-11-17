@@ -6,6 +6,8 @@ As I use `asp` in other tools, I sometimes stumble across missing features, or
 
   > I’ve run across cases where the name in the configuration isn’t quite the name I want to use in flags or the environment. For example, using `LaTeX` in code reflects the proper name of the tool, but results in flags with `la-te-x` in the name because we infer word-parts from the capitalization. We should be able to use `asp.long` on the struct field to define the “effective” name for the field.
 
+  _Sub-struct names added in [v0.2.0](https://github.com/JaredReisinger/asp/releases/tag/v0.2.0)!_
+
 - **Support ISO durations**
 
   > Go’s native `time.\Duration` only parses hours or smaller units, because days suffer from daylight saving time issues (making some days 23 hours, and some 25), months have different lengths, and years have leap-days. But in practice, some applications want an easy way to configure “2 months”. Using a `string` and parsing as-needed works, but durations are common enough, and the ISO duration format is standard enough that it would be nice to support it directly. (If there’s an existing ISO duration library, maybe I could use that?)
@@ -13,6 +15,8 @@ As I use `asp` in other tools, I sometimes stumble across missing features, or
 - **Support extensible type deserializtion?**
 
   > Maybe I do? Need to re-read the code and document it!
+
+  _Added in [v0.2.0](https://github.com/JaredReisinger/asp/commit/758d7077bbc998905cf4361bf44d71d2fd799a35)!_
 
 # Thoughts on `asp` _(a brief history)_
 
@@ -36,12 +40,12 @@ That said, `asp` _absolutely relies_ on the functionality that `viper` (and `cob
 
 | Feature                    | `asp`  | `cobra` | `viper` | `envconfig` |
 | -------------------------- | :----: | :-----: | :-----: | :---------: |
-| CLI flags                  | “free” |   yes   |  yes\*  |      ?      |
-| environment variables      | “free” |   no    |   yes   |      ?      |
-| configuration structure    |  yes   |   no    |   yes   |      ?      |
-| configuration file (read)  | “free” |   no    |   yes   |      ?      |
-| configuration file (write) |   no   |   no    |   yes   |      ?      |
-| remote configuration file  |   no   |   no    |   yes   |      ?      |
+| CLI flags                  | “free” |   yes   |  yes\*  |     no      |
+| environment variables      | “free” |   no    |   yes   |     yes     |
+| configuration structure    |  yes   |   no    |   yes   |     no      |
+| configuration file (read)  | “free” |   no    |   yes   |     no      |
+| configuration file (write) |   no   |   no    |   yes   |     no      |
+| remote configuration file  |   no   |   no    |   yes   |     no      |
 
 (\* As mentioned above, `viper` “works with” another package’s flags.)
 
