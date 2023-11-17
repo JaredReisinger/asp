@@ -5,8 +5,31 @@ before:
     # you may remove this if you don't need go generate
     - go generate ./...
 
+# gomod/proxy to enable verifiable builds
+# see https://goreleaser.com/customization/verifiable_builds/
+gomod:
+  proxy: true
+  env:
+    - GOPROXY=https://proxy.golang.org,direct
+    - GOSUMDB=sum.golang.org
+  mod: mod
+
 builds:
   - skip: true
+
+signs:
+  # NOTE: on GitHub, we might be able to omit the password (stdin) and --key,
+  # and it will magically use our GitHub-verified ID?  No idea what the public
+  # value would be in that case.  Bad docs!
+  - cmd: cosign
+    #stdin: '{{ .Env.COSIGN_PASSWORD }}'
+    args:
+      - "sign-blob"
+      #- "--key=env://COSIGN_PRIVATE_KEY"
+      - "--output-signature=${signature}"
+      - "${artifact}"
+      - "--yes" # needed on cosign 2.0.0+
+    artifacts: all
 
 checksum:
   name_template: "checksums.txt"

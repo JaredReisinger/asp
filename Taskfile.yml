@@ -73,4 +73,4 @@ tasks:
   release:
     desc: Run a snapshot (test) release
     cmds:
-      - goreleaser release --snapshot --rm-dist
+      - goreleaser release --snapshot --clean
