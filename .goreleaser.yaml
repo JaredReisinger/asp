@@ -17,6 +17,9 @@ gomod:
 builds:
   - skip: true
 
+# I was hoping to at least get a manifest, and/or to sign the source archive,
+# but no such luck.  Leaving this here so that *if* we end up with artifacts, it
+# either just starts signing, or we get a build failure and I can make it work.
 signs:
   # NOTE: on GitHub, we might be able to omit the password (stdin) and --key,
   # and it will magically use our GitHub-verified ID?  No idea what the public

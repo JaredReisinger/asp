@@ -10,6 +10,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/iancoleman/strcase"
+
 	"github.com/jaredreisinger/asp/decoders"
 )
 
@@ -22,6 +24,18 @@ var (
 	// is an unsupported type.
 	ErrConfigFieldUnsupported = errors.New("config struct field is of an unsupported type (pointer, array, channel or size-specific number)")
 )
+
+var templateFuncs = template.FuncMap{
+	"camel":              strcase.ToCamel,
+	"delimited":          strcase.ToDelimited,
+	"kebab":              strcase.ToKebab,
+	"lowerCamel":         strcase.ToLowerCamel,
+	"screamingDelimited": strcase.ToScreamingDelimited,
+	"screamingKebab":     strcase.ToScreamingKebab,
+	"screamingSnake":     strcase.ToScreamingSnake,
+	"snake":              strcase.ToSnake,
+	"snakeWithIgnore":    strcase.ToSnakeWithIgnore,
+}
 
 // processStruct the the main entrypoint for creating CLI flags and environment
 // variable mappings for a configuration struct type.
@@ -84,9 +98,9 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 				desc = fmt.Sprintf("%s (env: {{.Env}})", desc)
 			}
 
-			// We allow the description attribute to include template values that
-			// we fill in based on the calculated name, env, etc.
-			tmpl, err := template.New("desc").Parse(desc)
+			// We allow the description attribute to include template values
+			// that we fill in based on the calculated name, env, etc.
+			tmpl, err := template.New("desc").Funcs(templateFuncs).Parse(desc)
 			if err != nil {
 				return err
 			}
