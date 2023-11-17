@@ -15,5 +15,18 @@ The env-prefix and default config name options are the ones most likely to be us
 asp.Attach(cmd, config{}, asp.WithEnvPrefix("MYAPP"), asp.WithDefaultConfigName("myapp"))
 ```
 
-## WithDecodeHook
+### WithConfigFlag / WithoutConfigFlag
 
+Turns on  (or off) the `--config` flag.
+
+### WithDecodeHook
+
+Under the covers, viper uses [mapstructure](https://pkg.go.dev/github.com/mitchellh/mapstructure) to decode values into typed structures. (See also [the viper doc](https://github.com/spf13/viper?tab=readme-ov-file#decoding-custom-formats).) You can use `asp.WithDecodeHook()` to provide your own [mapstructure.DecodeHookFunc](https://pkg.go.dev/github.com/mitchellh/mapstructure#DecodeHookFunc) to decode additional values. The default asp decoders are exported as well, so that you can leverage/combine them if you want.
+
+### WithDefaultConfigName
+
+Provides a default name for a config file to load.
+
+### WithEnvPrefix
+
+Allows you to provide a value to override the default `APP` environment variable name prefix.

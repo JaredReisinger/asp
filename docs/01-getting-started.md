@@ -14,68 +14,68 @@ Let’s assume you’re using Cobra and Go best practices, and have a `cmd/root
 package cmd
 
 import (
-	"fmt"
-	"os"
+    "fmt"
+    "os"
 
-	homedir "github.com/mitchellh/go-homedir"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+    homedir "github.com/mitchellh/go-homedir"
+    "github.com/spf13/cobra"
+    "github.com/spf13/viper"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "hugo",
-	Short: "Hugo is a very fast static site generator",
-	Long: `A Fast and Flexible Static Site Generator built with
+    Use:   "hugo",
+    Short: "Hugo is a very fast static site generator",
+    Long: `A Fast and Flexible Static Site Generator built with
 love by spf13 and friends in Go.
 Complete documentation is available at http://hugo.spf13.com`,
-	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
-	},
+    Run: func(cmd *cobra.Command, args []string) {
+        // Do Stuff Here
+    },
 }
 
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+    if err := rootCmd.Execute(); err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+    }
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&projectBase, "projectbase", "b", "", "base project directory eg. github.com/spf13/")
-	rootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "Author name for copyright attribution")
-	rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "Name of license for the project (can provide `licensetext` in config)")
-	rootCmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
-	viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
-	viper.BindPFlag("projectbase", rootCmd.PersistentFlags().Lookup("projectbase"))
-	viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
-	viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
-	viper.SetDefault("license", "apache")
+    cobra.OnInitialize(initConfig)
+    rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
+    rootCmd.PersistentFlags().StringVarP(&projectBase, "projectbase", "b", "", "base project directory eg. github.com/spf13/")
+    rootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "Author name for copyright attribution")
+    rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "Name of license for the project (can provide `licensetext` in config)")
+    rootCmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
+    viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
+    viper.BindPFlag("projectbase", rootCmd.PersistentFlags().Lookup("projectbase"))
+    viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
+    viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
+    viper.SetDefault("license", "apache")
 }
 
 func initConfig() {
-	// Don't forget to read config either from cfgFile or from home directory!
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+    // Don't forget to read config either from cfgFile or from home directory!
+    if cfgFile != "" {
+        // Use config file from the flag.
+        viper.SetConfigFile(cfgFile)
+    } else {
+        // Find home directory.
+        home, err := homedir.Dir()
+        if err != nil {
+            fmt.Println(err)
+            os.Exit(1)
+        }
 
-		// Search config in home directory with name ".cobra" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".cobra")
-	}
+        // Search config in home directory with name ".cobra" (without extension).
+        viper.AddConfigPath(home)
+        viper.SetConfigName(".cobra")
+    }
 
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println("Can't read config:", err)
-		os.Exit(1)
-	}
+    if err := viper.ReadInConfig(); err != nil {
+        fmt.Println("Can't read config:", err)
+        os.Exit(1)
+    }
 }
 ```
 
@@ -83,10 +83,10 @@ We'll start by defining a `struct` that holds all of the configuration values we
 
 ```go
 type rootConfig struct {
-	ProjectBase string
-	Author      string
-	License     string
-	UseViper    bool
+    ProjectBase string
+    Author      string
+    License     string
+    UseViper    bool
 }
 ```
 
@@ -108,88 +108,88 @@ Aside from a bit of error handling and the import for asp, that’s really all 
 package cmd
 
 import (
-	"fmt"
-	"os"
+    "fmt"
+    "os"
 
-+	"github.com/jaredreisinger/asp"
--	homedir "github.com/mitchellh/go-homedir"
-	"github.com/spf13/cobra"
--	"github.com/spf13/viper"
++    "github.com/jaredreisinger/asp"
+-    homedir "github.com/mitchellh/go-homedir"
+    "github.com/spf13/cobra"
+-    "github.com/spf13/viper"
 )
 
 +type rootConfig struct {
-+	ProjectBase string
-+	Author      string
-+	License     string
-+	UseViper    bool
++    ProjectBase string
++    Author      string
++    License     string
++    UseViper    bool
 +}
 
 var rootCmd = &cobra.Command{
-	Use:   "hugo",
-	Short: "Hugo is a very fast static site generator",
-	Long: `A Fast and Flexible Static Site Generator built with
+    Use:   "hugo",
+    Short: "Hugo is a very fast static site generator",
+    Long: `A Fast and Flexible Static Site Generator built with
 love by spf13 and friends in Go.
 Complete documentation is available at http://hugo.spf13.com`,
-	Run: func(cmd *cobra.Command, args []string) {
-+		cfg, err := asp.Get[rootConfig](cmd)
-+		if err != nil {
-+			fmt.Println(err)
-+			os.Exit(1)
-+		}
+    Run: func(cmd *cobra.Command, args []string) {
++        cfg, err := asp.Get[rootConfig](cmd)
++        if err != nil {
++            fmt.Println(err)
++            os.Exit(1)
++        }
 
-		// Do Stuff Here
-+		// ... and use `cfg.ProjectBase`, `cfg.Author`, etc.
-	},
+        // Do Stuff Here
++        // ... and use `cfg.ProjectBase`, `cfg.Author`, etc.
+    },
 }
 
 func Execute() {
-+	if err := asp.Attach(rootCmd, rootConfig{}); err != nil {
-+		fmt.Println(err)
-+		os.Exit(1)
-+	}
++    if err := asp.Attach(rootCmd, rootConfig{}); err != nil {
++        fmt.Println(err)
++        os.Exit(1)
++    }
 
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+    if err := rootCmd.Execute(); err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+    }
 }
 
 -func init() {
--	cobra.OnInitialize(initConfig)
--	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
--	rootCmd.PersistentFlags().StringVarP(&projectBase, "projectbase", "b", "", "base project directory eg. github.com/spf13/")
--	rootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "Author name for copyright attribution")
--	rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "Name of license for the project (can provide `licensetext` in config)")
--	rootCmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
--	viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
--	viper.BindPFlag("projectbase", rootCmd.PersistentFlags().Lookup("projectbase"))
--	viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
--	viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
--	viper.SetDefault("license", "apache")
+-    cobra.OnInitialize(initConfig)
+-    rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
+-    rootCmd.PersistentFlags().StringVarP(&projectBase, "projectbase", "b", "", "base project directory eg. github.com/spf13/")
+-    rootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "Author name for copyright attribution")
+-    rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "Name of license for the project (can provide `licensetext` in config)")
+-    rootCmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
+-    viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
+-    viper.BindPFlag("projectbase", rootCmd.PersistentFlags().Lookup("projectbase"))
+-    viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
+-    viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
+-    viper.SetDefault("license", "apache")
 -}
 -
 -func initConfig() {
--	// Don't forget to read config either from cfgFile or from home directory!
--	if cfgFile != "" {
--		// Use config file from the flag.
--		viper.SetConfigFile(cfgFile)
--	} else {
--		// Find home directory.
--		home, err := homedir.Dir()
--		if err != nil {
--			fmt.Println(err)
--			os.Exit(1)
--		}
+-    // Don't forget to read config either from cfgFile or from home directory!
+-    if cfgFile != "" {
+-        // Use config file from the flag.
+-        viper.SetConfigFile(cfgFile)
+-    } else {
+-        // Find home directory.
+-        home, err := homedir.Dir()
+-        if err != nil {
+-            fmt.Println(err)
+-            os.Exit(1)
+-        }
 -
--		// Search config in home directory with name ".cobra" (without extension).
--		viper.AddConfigPath(home)
--		viper.SetConfigName(".cobra")
--	}
+-        // Search config in home directory with name ".cobra" (without extension).
+-        viper.AddConfigPath(home)
+-        viper.SetConfigName(".cobra")
+-    }
 -
--	if err := viper.ReadInConfig(); err != nil {
--		fmt.Println("Can't read config:", err)
--		os.Exit(1)
--	}
+-    if err := viper.ReadInConfig(); err != nil {
+-        fmt.Println("Can't read config:", err)
+-        os.Exit(1)
+-    }
 -}
 ```
 
@@ -199,49 +199,49 @@ We’ve removed 39 lines, and added back only 17 (it would have been only 12 i
 package cmd
 
 import (
-	"fmt"
-	"os"
+    "fmt"
+    "os"
 
-	"github.com/jaredreisinger/asp"
-	"github.com/spf13/cobra"
+    "github.com/jaredreisinger/asp"
+    "github.com/spf13/cobra"
 )
 
 type rootConfig struct {
-	ProjectBase string
-	Author      string
-	License     string
-	UseViper    bool
+    ProjectBase string
+    Author      string
+    License     string
+    UseViper    bool
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "hugo",
-	Short: "Hugo is a very fast static site generator",
-	Long: `A Fast and Flexible Static Site Generator built with
+    Use:   "hugo",
+    Short: "Hugo is a very fast static site generator",
+    Long: `A Fast and Flexible Static Site Generator built with
 love by spf13 and friends in Go.
 Complete documentation is available at http://hugo.spf13.com`,
-	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := asp.Get[rootConfig](cmd)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		_ = cfg
+    Run: func(cmd *cobra.Command, args []string) {
+        cfg, err := asp.Get[rootConfig](cmd)
+        if err != nil {
+            fmt.Println(err)
+            os.Exit(1)
+        }
+        _ = cfg
 
-		// Do Stuff Here
-		// ... and use `cfg.ProjectBase`, `cfg.Author`, etc.
-	},
+        // Do Stuff Here
+        // ... and use `cfg.ProjectBase`, `cfg.Author`, etc.
+    },
 }
 
 func Execute() {
-	if err := asp.Attach(rootCmd, rootConfig{}); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+    if err := asp.Attach(rootCmd, rootConfig{}); err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+    }
 
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+    if err := rootCmd.Execute(); err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+    }
 }
 ```
 
@@ -274,4 +274,4 @@ You can see that all of the expected command-line flags are present, including `
 
 4. The config file structure is driven directly from the type of the configuration structure. Instead of interpreting dotted names in the viper binding lines, you can just look at the declared type.
 
-You can find out more about how to solve the first and second issues in XXX.
+You can find out more about how to solve the first and second issues in [_Config tags_](05-config-tags.md).

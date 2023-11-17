@@ -6,10 +6,10 @@ Let’s look again at the configuration type declaration from [_Getting started_
 
 ```go
 type rootConfig struct {
-	ProjectBase string
-	Author      string
-	License     string
-	UseViper    bool
+    ProjectBase string
+    Author      string
+    License     string
+    UseViper    bool
 }
 ```
 
@@ -49,10 +49,10 @@ There are times you want to provide more semantic structure to your configuratio
 
 ```go
 type rootConfig struct {
-	Author      struct {
-		Name  string
-		Email string
-	}
+    Author      struct {
+        Name  string
+        Email string
+    }
 }
 ```
 
@@ -68,14 +68,14 @@ Nested `struct`s result in flags and environment variables with the parent field
 
 ```go
 type person struct {
-	Name  string
-	Email string
+    Name  string
+    Email string
 }
 
 type rootConfig struct {
-	Author     person
-	Editor     person
-	Supervisor person
+    Author     person
+    Editor     person
+    Supervisor person
 }
 ```
 
@@ -93,10 +93,10 @@ There is one caveat, however. Since asp also hyphenates multi-word field names, 
 
 ```go
 type rootConfig struct {
-	AuthorEmail string
-	Author      struct {
-		Email string
-	}
+    AuthorEmail string
+    Author      struct {
+        Email string
+    }
 }
 ```
 
@@ -108,12 +108,12 @@ In some cases, you’ll have a struct whose fields you want to use _directly_ i
 
 ```go
 type Person struct {
-	Name  string
-	Email string
+    Name  string
+    Email string
 }
 
 type rootConfig struct {
-	Person `mapstructure:",squash"`
+    Person `mapstructure:",squash"`
 }
 ```
 
@@ -135,11 +135,11 @@ If you want the config file flattened in the same way that the flags and environ
 
 ```go
 type rootConfig struct {
-	Person `mapstructure:",squash"`
+    Person `mapstructure:",squash"`
 }
 ```
 
-This tells the unmarshaling code to expect the anonymous structs field inlined in the parent:
+This tells the unmarshaling code to [expect the anonymous structs field inlined in the parent](https://pkg.go.dev/github.com/mitchellh/mapstructure#hdr-Embedded_Structs_and_Squashing):
 
 ```yaml
 # not under a "person" key!

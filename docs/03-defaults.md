@@ -22,15 +22,15 @@ To help keep code readable, and to put the defaults closer to the definition of 
 
 ```go
 type rootConfig struct {
-	ProjectBase string
-	Author      string
-	License     string
-	UseViper    bool
+    ProjectBase string
+    Author      string
+    License     string
+    UseViper    bool
 }
 
 var defaults = rootConfig{
-	Author:  "YOUR NAME",
-	License: "apache",
+    Author:  "YOUR NAME",
+    License: "apache",
 }
 ```
 
