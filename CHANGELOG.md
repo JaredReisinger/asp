@@ -3,6 +3,18 @@
 _All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
 
 
+## [0.2.2](https://github.com/JaredReisinger/asp/compare/v0.2.1...v0.2.2) (2023-11-17)
+
+
+### Bug Fixes
+
+* flag description templates ([6822dbd](https://github.com/JaredReisinger/asp/commit/6822dbd5d0d48d714ed6098d2e55828c20a5b2d9))
+
+
+### Documentation
+
+* documentation overhaul ([4cd3548](https://github.com/JaredReisinger/asp/commit/4cd3548af60f76adbc0ca9428a6ab9611c0fdb1e))
+
 ## [0.2.1](https://github.com/JaredReisinger/asp/compare/v0.2.0...v0.2.1) (2023-11-17)
 
 
