@@ -3,6 +3,13 @@
 _All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
 
 
+## [0.2.1](https://github.com/JaredReisinger/asp/compare/v0.2.0...v0.2.1) (2023-11-17)
+
+
+### Bug Fixes
+
+* sign artifacts ([8d6b38c](https://github.com/JaredReisinger/asp/commit/8d6b38cb977d43b9ab14e56894258e40fcefe93b))
+
 # [0.2.0](https://github.com/JaredReisinger/asp/compare/v0.1.0...v0.2.0) (2023-11-16)
 
 
