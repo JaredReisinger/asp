@@ -3,6 +3,18 @@
 _All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
 
 
+## [0.3.1](https://github.com/JaredReisinger/asp/compare/v0.3.0...v0.3.1) (2025-08-10)
+
+### Bug Fixes
+
+* **dependencies:** update dependencies ([c141921](https://github.com/JaredReisinger/asp/commit/c141921f9826bbdad8edad4e408cec724ea9eecc))
+* migrate to go-viper/mapstructure/v2 ([068a4d3](https://github.com/JaredReisinger/asp/commit/068a4d3ec5afc666d2992ae6ec3fe41c6040c7d4))
+
+### Miscellaneous Chores
+
+* **deps:** bump golang.org/x/crypto from 0.29.0 to 0.35.0 ([ab08468](https://github.com/JaredReisinger/asp/commit/ab084684ce35006064649b5c76d635067f720880))
+* fix goreleaser version for ci/cd ([c7e4e68](https://github.com/JaredReisinger/asp/commit/c7e4e68adcd9e6bb6ed456fa2f6489f8980eccee))
+
 ## [0.3.0](https://github.com/JaredReisinger/asp/compare/v0.2.2...v0.3.0) (2025-08-10)
 
 ### Features
