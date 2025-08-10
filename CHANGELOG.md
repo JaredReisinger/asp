@@ -3,6 +3,22 @@
 _All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
 
 
+## [0.3.0](https://github.com/JaredReisinger/asp/compare/v0.2.2...v0.3.0) (2025-08-10)
+
+### Features
+
+* improve description templating ([7b6b37e](https://github.com/JaredReisinger/asp/commit/7b6b37ef5bd67d0826729f4b4a6f1cb34820a957))
+
+### Documentation
+
+* improve docs ([2ab0e91](https://github.com/JaredReisinger/asp/commit/2ab0e910f219412c0ac02c09542439f6f3b88b59))
+* small doc tweak ([0e3d604](https://github.com/JaredReisinger/asp/commit/0e3d604b79166791d1a71bcfcc8fd1058f72d2f1))
+* update templating docs ([5c71f73](https://github.com/JaredReisinger/asp/commit/5c71f73c40445ad0acbfbd7497ba5b340ad55542))
+
+### Miscellaneous Chores
+
+* update build/publish tooling ([25462be](https://github.com/JaredReisinger/asp/commit/25462be8006b6cf13f421926704bb3a5a88060cf))
+
 ## [0.2.2](https://github.com/JaredReisinger/asp/compare/v0.2.1...v0.2.2) (2023-11-17)
 
 
