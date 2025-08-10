@@ -14,18 +14,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: '>=1.19.2'
+          go-version: '>=1.24'
 
-      - uses: arduino/setup-task@v1
+      - uses: arduino/setup-task@v2
         with:
           # version: 3.20 # 3.x is good enough
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: task test
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
         uses: goreleaser/goreleaser-action@v5

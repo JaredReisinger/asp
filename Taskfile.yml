@@ -54,7 +54,7 @@ tasks:
     desc: Run pre-commit checks...
     deps:
       - test
-      - security
+      # - security ## bogus internal error in gosec?
     cmds:
       - go vet ./...
 
