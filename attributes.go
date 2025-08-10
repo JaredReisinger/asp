@@ -68,7 +68,7 @@ type attrs struct {
 	long  string
 	short string
 	env   string
-	desc  string // *template* string to allow full name to be substituted in?
+	desc  string // *template* string to allow full name to be substituted in
 }
 
 func (a *attrs) setAll(s string) {

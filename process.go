@@ -1,7 +1,6 @@
 package asp
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"reflect"
@@ -10,7 +9,9 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/iancoleman/strcase"
+	"github.com/pkg/errors"
 
 	"github.com/jaredreisinger/asp/decoders"
 )
@@ -25,6 +26,7 @@ var (
 	ErrConfigFieldUnsupported = errors.New("config struct field is of an unsupported type (pointer, array, channel or size-specific number)")
 )
 
+// TODO: with the introduction of sprig, we may not need these...
 var templateFuncs = template.FuncMap{
 	"camel":              strcase.ToCamel,
 	"delimited":          strcase.ToDelimited,
@@ -74,6 +76,11 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 	// log.Printf("fields: %#v", fields)
 
 	for _, f := range fields {
+		// Skip any unexported fields!
+		if !f.IsExported() {
+			continue
+		}
+
 		// We deal with anonymous (embedded) structs by *not* updating the
 		// parentCanonical/parentEnv strings when recursing.  We also need to
 		// *not* attempt to process the mirrored sub-elements directly, because
@@ -100,9 +107,9 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 
 			// We allow the description attribute to include template values
 			// that we fill in based on the calculated name, env, etc.
-			tmpl, err := template.New("desc").Funcs(templateFuncs).Parse(desc)
+			tmpl, err := template.New("desc").Funcs(sprig.TxtFuncMap()).Funcs(templateFuncs).Parse(desc)
 			if err != nil {
-				return err
+				return errors.WithMessagef(err, "on %s (%q)", f.Name, desc)
 			}
 			descBuilder := &strings.Builder{}
 			err = tmpl.Execute(descBuilder, map[string]string{
@@ -111,6 +118,8 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 				"Short": joinedAttrs.short,
 				"Env":   joinedAttrs.env,
 				"NoEnv": "",
+				// special context naming (from ASE work)
+				"ParentName": parentAttrs.name,
 			})
 			if err != nil {
 				return err
