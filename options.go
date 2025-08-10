@@ -1,6 +1,6 @@
 package asp
 
-import "github.com/mitchellh/mapstructure"
+import "github.com/go-viper/mapstructure/v2"
 
 // Option represents an option to the [asp.Attach] method.
 type Option func(*aspBase) error

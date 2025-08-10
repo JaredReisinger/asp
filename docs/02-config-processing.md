@@ -139,7 +139,7 @@ type rootConfig struct {
 }
 ```
 
-This tells the unmarshaling code to [expect the anonymous structs field inlined in the parent](https://pkg.go.dev/github.com/mitchellh/mapstructure#hdr-Embedded_Structs_and_Squashing):
+This tells the unmarshaling code to [expect the anonymous structs field inlined in the parent](https://pkg.go.dev/github.com/go-viper/mapstructure/v2#hdr-Embedded_Structs_and_Squashing):
 
 ```yaml
 # not under a "person" key!
