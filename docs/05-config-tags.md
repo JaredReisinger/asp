@@ -81,6 +81,7 @@ Sets the usage description for the flag. This is a [Go-style template string](ht
 | .Short             | value    | short-form flag name                                                                                             | `x`               |
 | .Env               | value    | environment variable name, `_`-delimited                                                                         | `APP_OUTER_INNER` |
 | .NoEnv             | value    | empty string sentinel to prevent automatic appending of environment variable                                     |                   |
+| .ParentName        | value    | complete _parent_ field name, `.`-delimited                                                                      | `Outer`           |
 | camel              | function | [`strcase.ToCamel`](https://pkg.go.dev/github.com/iancoleman/strcase#ToCamel) function                           | `OuterInner`      |
 | delimited          | function | [`strcase.ToDelimited`](https://pkg.go.dev/github.com/iancoleman/strcase#ToDelimited) function                   | `outer.inner`     |
 | kebab              | function | [`strcase.ToKebab`](https://pkg.go.dev/github.com/iancoleman/strcase#ToKebab) function                           | `outer-inner`     |
@@ -90,6 +91,10 @@ Sets the usage description for the flag. This is a [Go-style template string](ht
 | screamingSnake     | function | [`strcase.ToScreamingSnake`](https://pkg.go.dev/github.com/iancoleman/strcase#ToScreamingSnake) function         | `OUTER_INNER`     |
 | snake              | function | [`strcase.ToSnake`](https://pkg.go.dev/github.com/iancoleman/strcase#ToSnake) function                           | `outer_inner`     |
 | snakeWithIgnore    | function | [`strcase.ToSnakeWithIgnore`](https://pkg.go.dev/github.com/iancoleman/strcase#ToSnakeWithIgnore) function       | `outer_inner`     |
+
+> [!NOTE]
+>
+> As of v0.2.3, the [sprig](https://masterminds.github.io/sprig/) functions are also available.
 
 If no `asp.desc:"DESCRIPTION"` or `asp:",,,DESCRIPTION"` tag is present, asp defaults to:
 
@@ -103,7 +108,7 @@ which results in:
 "sets the outer inner value (env: APP_OUTER_INNER)"
 ```
 
-If an description override is present, asp looks to see if either `{{.Env}}` or `{{.NoEnv}}` is included in the string. If not, it automatically appends `" (env: {{.Env}})"`  You can use `{{.Env}}` to include the environment variable name in a specific location in the description, or use `{{.NoEnv}}` to indicate that the automatic appending should be avoided.
+If an description override is present, asp looks to see if either `{{.Env}}` or `{{.NoEnv}}` is included in the string. If not, it automatically appends `" (env: {{.Env}})"` You can use `{{.Env}}` to include the environment variable name in a specific location in the description, or use `{{.NoEnv}}` to indicate that the automatic appending should be avoided.
 
 ### `asp.env`
 
