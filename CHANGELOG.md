@@ -3,6 +3,12 @@
 _All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
 
 
+## [0.4.0](https://github.com/JaredReisinger/asp/compare/v0.3.1...v0.4.0) (2025-08-13)
+
+### Features
+
+* add flag serialization and sensitive fields ([b9d7574](https://github.com/JaredReisinger/asp/commit/b9d757445bfdbb70d78ad1944a1f8c693a6f0615))
+
 ## [0.3.1](https://github.com/JaredReisinger/asp/compare/v0.3.0...v0.3.1) (2025-08-10)
 
 ### Bug Fixes
