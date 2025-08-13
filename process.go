@@ -39,7 +39,7 @@ var templateFuncs = template.FuncMap{
 	"snakeWithIgnore":    strcase.ToSnakeWithIgnore,
 }
 
-// processStruct the the main entrypoint for creating CLI flags and environment
+// processStruct is the main entrypoint for creating CLI flags and environment
 // variable mappings for a configuration struct type.
 func (a *aspBase) processStruct(s interface{}) error {
 	// Now that we've separated the entrypoint and recursive handler, we can be

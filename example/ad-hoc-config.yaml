@@ -1,3 +1,5 @@
 someValue: from ad-hoc-config.yaml file
 someFlag: true
 manyNumbers: [1, 2, 3, 4]
+
+secretValue: this will be redacted

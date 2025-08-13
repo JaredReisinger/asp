@@ -7,7 +7,7 @@ import (
 // helpers for time.Time values...
 type timeValue time.Time
 
-const timeLayout = time.RFC3339Nano
+const TimeLayout = time.RFC3339Nano
 
 var (
 	timeNow = time.Now // alias to enable testing
@@ -40,7 +40,7 @@ func (d *timeValue) String() string {
 	if t.IsZero() {
 		return ""
 	}
-	return t.Format(timeLayout)
+	return t.Format(TimeLayout)
 }
 
 func timeConv(s string) (interface{}, error) {
@@ -56,5 +56,5 @@ func timeConv(s string) (interface{}, error) {
 		return timeNow().Local(), nil
 	}
 
-	return time.Parse(timeLayout, s)
+	return time.Parse(TimeLayout, s)
 }

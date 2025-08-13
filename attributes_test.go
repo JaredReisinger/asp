@@ -11,40 +11,44 @@ func TestGetAttributes(t *testing.T) {
 	t.Parallel()
 
 	defaultDesc := "sets the {{delimited .Name ' '}} value"
-	// fields: fieldName, tag, name, long, short, env, desc
-	cases := map[string][7]string{
+	// fields: fieldName, tag, name, long, short, env, desc, sensitive
+	cases := map[string][8]string{
 		// "Ex" for "Example" is enough to catch case changes
-		"no tag":         {"Ex", ``, "Ex", "ex", "", "EX", defaultDesc},
-		"long only":      {"Ex", `asp.long:"replaced"`, "Ex", "replaced", "", "EX", defaultDesc},
-		"short only":     {"Ex", `asp.short:"r"`, "Ex", "ex", "r", "EX", defaultDesc},
-		"env only":       {"Ex", `asp.env:"REPLACED"`, "Ex", "ex", "", "REPLACED", defaultDesc},
-		"desc only":      {"Ex", `asp.desc:"Replaced"`, "Ex", "ex", "", "EX", "Replaced"},
-		"all long only":  {"Ex", `asp:"replaced"`, "Ex", "replaced", "", "EX", defaultDesc},
-		"all short only": {"Ex", `asp:",r"`, "Ex", "ex", "r", "EX", defaultDesc},
-		"all env only":   {"Ex", `asp:",,REPLACED"`, "Ex", "ex", "", "REPLACED", defaultDesc},
-		"all desc only":  {"Ex", `asp:",,,Replaced"`, "Ex", "ex", "", "EX", "Replaced"},
-		"all all":        {"Ex", `asp:"replaced,r,REPLACED,Replaced"`, "Ex", "replaced", "r", "REPLACED", "Replaced"},
+		"no tag":             {"Ex", ``, "Ex", "ex", "", "EX", defaultDesc, ""},
+		"long only":          {"Ex", `asp.long:"replaced"`, "Ex", "replaced", "", "EX", defaultDesc, ""},
+		"short only":         {"Ex", `asp.short:"r"`, "Ex", "ex", "r", "EX", defaultDesc, ""},
+		"env only":           {"Ex", `asp.env:"REPLACED"`, "Ex", "ex", "", "REPLACED", defaultDesc, ""},
+		"desc only":          {"Ex", `asp.desc:"Replaced"`, "Ex", "ex", "", "EX", "Replaced", ""},
+		"sensitive only":     {"Ex", `asp.sensitive:"true"`, "Ex", "ex", "", "EX", defaultDesc, "true"},
+		"all long only":      {"Ex", `asp:"replaced"`, "Ex", "replaced", "", "EX", defaultDesc, ""},
+		"all short only":     {"Ex", `asp:",r"`, "Ex", "ex", "r", "EX", defaultDesc, ""},
+		"all env only":       {"Ex", `asp:",,REPLACED"`, "Ex", "ex", "", "REPLACED", defaultDesc, ""},
+		"all desc only":      {"Ex", `asp:",,,Replaced"`, "Ex", "ex", "", "EX", "Replaced", ""},
+		"all sensitive only": {"Ex", `asp:",,,,true"`, "Ex", "ex", "", "EX", defaultDesc, "true"},
+		"all all":            {"Ex", `asp:"replaced,r,REPLACED,Replaced,true"`, "Ex", "replaced", "r", "REPLACED", "Replaced", "true"},
 
 		// multi-word name
-		"multi no tag":         {"ExAm", ``, "ExAm", "ex-am", "", "EXAM", defaultDesc},
-		"multi long only":      {"ExAm", `asp.long:"replaced"`, "ExAm", "replaced", "", "EXAM", defaultDesc},
-		"multi short only":     {"ExAm", `asp.short:"r"`, "ExAm", "ex-am", "r", "EXAM", defaultDesc},
-		"multi env only":       {"ExAm", `asp.env:"REPLACED"`, "ExAm", "ex-am", "", "REPLACED", defaultDesc},
-		"multi desc only":      {"ExAm", `asp.desc:"Replaced"`, "ExAm", "ex-am", "", "EXAM", "Replaced"},
-		"multi all long only":  {"ExAm", `asp:"replaced"`, "ExAm", "replaced", "", "EXAM", defaultDesc},
-		"multi all short only": {"ExAm", `asp:",r"`, "ExAm", "ex-am", "r", "EXAM", defaultDesc},
-		"multi all env only":   {"ExAm", `asp:",,REPLACED"`, "ExAm", "ex-am", "", "REPLACED", defaultDesc},
-		"multi all desc only":  {"ExAm", `asp:",,,Replaced"`, "ExAm", "ex-am", "", "EXAM", "Replaced"},
+		"multi no tag":         {"ExAm", ``, "ExAm", "ex-am", "", "EXAM", defaultDesc, ""},
+		"multi long only":      {"ExAm", `asp.long:"replaced"`, "ExAm", "replaced", "", "EXAM", defaultDesc, ""},
+		"multi short only":     {"ExAm", `asp.short:"r"`, "ExAm", "ex-am", "r", "EXAM", defaultDesc, ""},
+		"multi env only":       {"ExAm", `asp.env:"REPLACED"`, "ExAm", "ex-am", "", "REPLACED", defaultDesc, ""},
+		"multi desc only":      {"ExAm", `asp.desc:"Replaced"`, "ExAm", "ex-am", "", "EXAM", "Replaced", ""},
+		"multi all long only":  {"ExAm", `asp:"replaced"`, "ExAm", "replaced", "", "EXAM", defaultDesc, ""},
+		"multi all short only": {"ExAm", `asp:",r"`, "ExAm", "ex-am", "r", "EXAM", defaultDesc, ""},
+		"multi all env only":   {"ExAm", `asp:",,REPLACED"`, "ExAm", "ex-am", "", "REPLACED", defaultDesc, ""},
+		"multi all desc only":  {"ExAm", `asp:",,,Replaced"`, "ExAm", "ex-am", "", "EXAM", "Replaced", ""},
 
 		// combinations of tags
-		"all and long":  {"Ex", `asp:"r,r,R,R" asp.long:"override"`, "Ex", "override", "r", "R", "R"},
-		"all and short": {"Ex", `asp:"r,r,R,R" asp.short:"o"`, "Ex", "r", "o", "R", "R"},
-		"all and env":   {"Ex", `asp:"r,r,R,R" asp.env:"OVERRIDE"`, "Ex", "r", "r", "OVERRIDE", "R"},
-		"all and desc":  {"Ex", `asp:"r,r,R,R" asp.desc:"Override"`, "Ex", "r", "r", "R", "Override"},
+		"all and long":      {"Ex", `asp:"r,r,R,R,false" asp.long:"override"`, "Ex", "override", "r", "R", "R", ""},
+		"all and short":     {"Ex", `asp:"r,r,R,R,false" asp.short:"o"`, "Ex", "r", "o", "R", "R", ""},
+		"all and env":       {"Ex", `asp:"r,r,R,R,false" asp.env:"OVERRIDE"`, "Ex", "r", "r", "OVERRIDE", "R", ""},
+		"all and desc":      {"Ex", `asp:"r,r,R,R,false" asp.desc:"Override"`, "Ex", "r", "r", "R", "Override", ""},
+		"all and sensitive": {"Ex", `asp:"r,r,R,R,false" asp.sensitive:"true"`, "Ex", "r", "r", "R", "R", "true"},
 	}
 
 	for k, v := range cases {
-		field, tag, name, long, short, env, desc := v[0], v[1], v[2], v[3], v[4], v[5], v[6]
+		field, tag, name, long, short, env, desc, sensitiveStr := v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7]
+		sensitive := sensitiveStr == "true"
 
 		t.Run(k, func(t *testing.T) {
 			t.Parallel()
@@ -61,6 +65,7 @@ func TestGetAttributes(t *testing.T) {
 			assert.Equal(t, short, attrs.short)
 			assert.Equal(t, env, attrs.env)
 			assert.Equal(t, desc, attrs.desc)
+			assert.Equal(t, sensitive, attrs.sensitive)
 		})
 	}
 }
@@ -95,14 +100,17 @@ func TestJoinField(t *testing.T) {
 func TestAttrsJoin(t *testing.T) {
 	t.Parallel()
 
-	attrsNone := attrs{"", "", "", "", ""}
-	attrsAll := attrs{"Name", "long", "s", "ENV", "desc"}
+	attrsNone := attrs{"", "", "", "", "", false}
+	attrsAll := attrs{"Name", "long", "s", "ENV", "desc", false}
+	attrsSensitive := attrs{"", "", "", "", "", true}
 
 	cases := map[string][3]attrs{
-		"none none": {attrsNone, attrsNone, attrs{"", "", "", "", ""}},
-		"none all":  {attrsNone, attrsAll, attrs{"Name", "long", "s", "ENV", "desc"}},
-		"all none":  {attrsAll, attrsNone, attrs{"Name", "long", "", "ENV", ""}},
-		"all all":   {attrsAll, attrsAll, attrs{"Name.Name", "long-long", "s", "ENV_ENV", "desc"}},
+		"none none":      {attrsNone, attrsNone, attrs{"", "", "", "", "", false}},
+		"none all":       {attrsNone, attrsAll, attrs{"Name", "long", "s", "ENV", "desc", false}},
+		"all none":       {attrsAll, attrsNone, attrs{"Name", "long", "", "ENV", "", false}},
+		"all all":        {attrsAll, attrsAll, attrs{"Name.Name", "long-long", "s", "ENV_ENV", "desc", false}},
+		"none sensitive": {attrsNone, attrsSensitive, attrsSensitive},
+		"sensitive none": {attrsSensitive, attrsNone, attrsSensitive},
 	}
 
 	for k, v := range cases {
@@ -117,6 +125,7 @@ func TestAttrsJoin(t *testing.T) {
 			assert.Equal(t, expected.short, actual.short)
 			assert.Equal(t, expected.env, actual.env)
 			assert.Equal(t, expected.desc, actual.desc)
+			assert.Equal(t, expected.sensitive, actual.sensitive)
 		})
 	}
 

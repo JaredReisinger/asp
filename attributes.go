@@ -21,11 +21,12 @@ import (
 func getAttributes(f reflect.StructField) attrs {
 	// pre-fill with defaults from field name (canonicalize?)
 	a := attrs{
-		name:  f.Name,
-		long:  strcase.ToKebab(f.Name),
-		short: "",
-		env:   strings.ToUpper(f.Name),
-		desc:  "sets the {{delimited .Name ' '}} value",
+		name:      f.Name,
+		long:      strcase.ToKebab(f.Name),
+		short:     "",
+		env:       strings.ToUpper(f.Name),
+		desc:      "sets the {{delimited .Name ' '}} value",
+		sensitive: false,
 	}
 
 	// now go through the possible tags and allow them to override
@@ -58,17 +59,19 @@ func init() {
 		{"asp.short", (*attrs).setShort},
 		{"asp.env", (*attrs).setEnv},
 		{"asp.desc", (*attrs).setDesc},
+		{"asp.sensitive", (*attrs).setSensitive},
 	}
 }
 
 // The attrs struct holds the collection of attrs parsed from the struct field
 // tags.
 type attrs struct {
-	name  string
-	long  string
-	short string
-	env   string
-	desc  string // *template* string to allow full name to be substituted in
+	name      string
+	long      string
+	short     string
+	env       string
+	desc      string // *template* string to allow full name to be substituted in
+	sensitive bool
 }
 
 func (a *attrs) setAll(s string) {
@@ -82,20 +85,22 @@ func (a *attrs) setAll(s string) {
 	}
 }
 
-func (a *attrs) setLong(s string)  { a.long = s }
-func (a *attrs) setShort(s string) { a.short = s }
-func (a *attrs) setEnv(s string)   { a.env = s }
-func (a *attrs) setDesc(s string)  { a.desc = s }
+func (a *attrs) setLong(s string)      { a.long = s }
+func (a *attrs) setShort(s string)     { a.short = s }
+func (a *attrs) setEnv(s string)       { a.env = s }
+func (a *attrs) setDesc(s string)      { a.desc = s }
+func (a *attrs) setSensitive(s string) { a.sensitive = (strings.ToLower(s) == "true") }
 
 // combine builds a new attribute set using the aggregation/combination rules
 // for each individual field
 func (a *attrs) join(child attrs) attrs {
 	return attrs{
-		name:  joinField(a.name, child.name, "."),
-		long:  joinField(a.long, child.long, "-"),
-		short: child.short, // short flags are *never* joined!
-		env:   joinField(a.env, child.env, "_"),
-		desc:  child.desc, // descriptions are *never* joined!
+		name:      joinField(a.name, child.name, "."),
+		long:      joinField(a.long, child.long, "-"),
+		short:     child.short, // short flags are *never* joined!
+		env:       joinField(a.env, child.env, "_"),
+		desc:      child.desc, // descriptions are *never* joined!
+		sensitive: a.sensitive || child.sensitive,
 	}
 }
 

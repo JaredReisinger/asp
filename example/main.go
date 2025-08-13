@@ -19,6 +19,8 @@ type Config struct {
 		NamesLikeThis string
 	}
 
+	SecretValue string `asp.sensitive:"true"`
+
 	Verbose bool `asp.short:"v" asp.desc:"get noisy"`
 }
 
@@ -47,4 +49,8 @@ func commandHandler(cmd *cobra.Command, args []string) {
 	cobra.CheckErr(err)
 
 	log.Printf("got config: %#v", config)
+
+	s, err := asp.SerializeFlags(config, true)
+	cobra.CheckErr(err)
+	log.Printf("serialized flags: %s", s)
 }

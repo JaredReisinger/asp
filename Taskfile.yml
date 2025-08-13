@@ -70,6 +70,12 @@ tasks:
     cmds:
       - go run example/main.go
 
+  example:run:config:
+    desc: Run the example
+    aliases: [run]
+    cmds:
+      - go run example/main.go --config example/ad-hoc-config.yaml
+
   release:
     desc: Run a snapshot (test) release
     cmds:

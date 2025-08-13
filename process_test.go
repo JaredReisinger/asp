@@ -10,10 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type AnonymousEmbedded struct {
-	EmbeddedInt int
-}
-
 type processTestConfig struct {
 	Time            time.Time
 	Duration        time.Duration
@@ -29,12 +25,16 @@ type processTestConfig struct {
 	StringSlice     []string
 	MapStringInt    map[string]int
 	MapStringString map[string]string
-
-	Nested struct {
-		Dummy int
-	}
-
+	Nested          Nested
 	AnonymousEmbedded
+}
+
+type Nested struct {
+	Dummy int
+}
+
+type AnonymousEmbedded struct {
+	EmbeddedInt int
 }
 
 func newBase(t *testing.T) *aspBase {

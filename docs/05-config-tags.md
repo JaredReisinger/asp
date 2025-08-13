@@ -44,19 +44,20 @@ And now we have very good fidelity with the original implementation.
 
 ## Tags
 
-| tag                      | meaning                                                                                     |
-| ------------------------ | ------------------------------------------------------------------------------------------- |
-| [`asp`](#asp)            | combination of the other four values, comma-separated in this order: `long,short,env,desc`. |
-| [`asp.desc`](#aspdesc)   | help text to show for the flag; (processed as a template)                                   |
-| [`asp.env`](#aspenv)     | environment variable (prepended with envPrefix; `APP` by default)                           |
-| [`asp.long`](#asplong)   | long `--some-name` style CLI flag                                                           |
-| [`asp.short`](#aspshort) | short `-n` style CLI flag                                                                   |
+| tag                              | meaning                                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------------------- |
+| [`asp`](#asp)                    | combination of the other four values, comma-separated in this order: `long,short,env,desc`. |
+| [`asp.desc`](#aspdesc)           | help text to show for the flag; (processed as a template)                                   |
+| [`asp.env`](#aspenv)             | environment variable (prepended with envPrefix; `APP` by default)                           |
+| [`asp.long`](#asplong)           | long `--some-name` style CLI flag                                                           |
+| [`asp.short`](#aspshort)         | short `-n` style CLI flag                                                                   |
+| [`asp.sensitive`](#aspsensitive) | indicates that the value is "sensitive" and should be redacted from SerializeFlags output.  |
 
 If you are consistently providing most or all of the values, the `asp` tag is a bit more concise.
 
 ### `asp`
 
-The “all the tags” tag, `asp:""` allows you to specify the long, short, env, and desc values, separated by commas. The "explicit" tags always take precedence, but any non-empty portions of `asp` take precedence over the default fallback values. To _omit_ a value, the explicit attribute tag must be used.
+The “all the tags” tag, `asp:""` allows you to specify the long, short, env, desc, and sensitive values, separated by commas. The "explicit" tags always take precedence, but any non-empty portions of `asp` take precedence over the default fallback values. To _omit_ a value, the explicit attribute tag must be used.
 
 ### `asp.desc`
 
@@ -121,3 +122,7 @@ Provides an override value for “this field’s” portion of the a long flag n
 ### `asp.short`
 
 Provides the short flag (single character) for the field.
+
+### `asp.sensitive`
+
+If set to `true` (`asp.sensitive:"true"`), the SerializeFlags function will use `[REDACTED]` in place of the actual value.
