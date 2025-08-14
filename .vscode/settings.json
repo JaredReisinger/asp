@@ -1,6 +1,8 @@
 {
     "cSpell.words": [
+        "conventionalcommits",
         "gomod",
+        "goreleaser",
         "iancoleman",
         "intf",
         "mapstructure",

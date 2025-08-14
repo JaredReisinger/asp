@@ -32,6 +32,7 @@ jobs:
       - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
         uses: goreleaser/goreleaser-action@v5
         with:
+          version: '~> v2'
           install-only: true
 
       - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
