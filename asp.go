@@ -38,9 +38,9 @@ type contextKey struct{}
 
 var ContextKey = contextKey{}
 
-// Asp[T IncomingConfig] is an interface that represents the interface for
-// settings/options.  After creating/initializing with a configuration structure
-// (with default values), the methods on the interface allow for loading from
+// Asp is an interface that represents the interface for settings/options. After
+// creating/initializing with a configuration structure (with default values),
+// the methods on the interface allow for loading from
 // command-line/config/environment, as well as lower-level access to the created
 // viper instance and cobra command.  (In most cases these should not be needed,
 // though!)
@@ -60,9 +60,8 @@ type Asp[T Config] interface {
 	Viper() *viper.Viper
 }
 
-// DefaultDecodeHook is the default set of decoders that [Asp[T
-// IncomingConfig].Config] uses. See the [WithDecodeHook] option to provide your
-// own list of decoders.
+// DefaultDecodeHook is the default set of decoders that [Asp.Config] uses. See
+// the [WithDecodeHook] option to provide your own list of decoders.
 var DefaultDecodeHook = mapstructure.ComposeDecodeHookFunc(
 	mapstructure.StringToTimeDurationHookFunc(),
 	decoders.StringToTime(),
@@ -72,22 +71,21 @@ var DefaultDecodeHook = mapstructure.ComposeDecodeHookFunc(
 	decoders.StringToSlice(","),
 )
 
-// Attach[T] adds to a [cobra.Command] the command-line arguments, and environment
+// Attach adds to a [cobra.Command] the command-line arguments, and environment
 // variable and configuration file bindings inferred from `configDefaults`.  If
 // no [Option] arguments are provided, it effectively defaults to
 // [WithConfigFlag], [WithEnvPrefix]("APP"), and
 // [WithDecodeHook]([DefaultDecodeHook]).
 //
 // Note that the [cobra.Command]'s PersistentPreRun is set to stash away the
-// [Asp[T]] instance, which the [Get[T]] method later makes use of.
+// [Asp] instance, which the [Get] method later makes use of.
 func Attach[T Config](cmd *cobra.Command, configDefaults T, options ...Option) error {
 	_, err := AttachInstance(cmd, configDefaults, options...)
 	return err
 }
 
-// AttachInstance[T] is identical to [Attach[T]], but also returns the [Asp[T]]
-// instance itself, in case the default context-stashing doesn't suit your
-// needs.
+// AttachInstance is identical to [Attach], but also returns the [Asp] instance
+// itself, in case the default context-stashing doesn't suit your needs.
 func AttachInstance[T Config](cmd *cobra.Command, configDefaults T, options ...Option) (Asp[T], error) {
 	vip := viper.New()
 
@@ -144,7 +142,7 @@ func AttachInstance[T Config](cmd *cobra.Command, configDefaults T, options ...O
 	return a, nil
 }
 
-// Get[T] retrieves the asp instance from the [cobra.Command]'s context and gets
+// Get retrieves the asp instance from the [cobra.Command]'s context and gets
 // the current configuration from flags, environment variables, and config
 // files.
 func Get[T Config](cmd *cobra.Command) (*T, error) {

@@ -17,7 +17,7 @@ The [cobra] package provides excellent command-line flag functionality, and [vip
 
  2. encourage good practices by ensuring that _every_ option has config, command-line _and_ environment variable representation;
 
- 3. avoid possible typos that using string-based configuration lookups can cause—Go can’t tell that `viper.Get("sommeSetting")` is misspelled at compile time—but it _can_ tell that `config.sommeSetting` is invalid if the struct defines the member as `config.someSetting`.
+ 3. avoid possible typos that using string-based configuration lookups can cause—Go can’t tell that `viper.Get("SommeSetting")` is misspelled at compile time—but it _can_ tell that `config.SommeSetting` is invalid if the struct defines the member as `config.SomeSetting`.
 
 [Getting started]: https://github.com/JaredReisinger/asp/blob/main/docs/01-getting-started.md
 [Config processing]: https://github.com/JaredReisinger/asp/blob/main/docs/02-config-processing.md
