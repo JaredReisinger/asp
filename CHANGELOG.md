@@ -3,6 +3,20 @@
 _All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
 
 
+## [0.4.2](https://github.com/JaredReisinger/asp/compare/v0.4.1...v0.4.2) (2026-02-06)
+
+### Bug Fixes
+
+* move codecov pollution after release ([5272fca](https://github.com/JaredReisinger/asp/commit/5272fcab090e2ef632211dd8e3c8e7d31a218c81))
+
+### Continuous Integration
+
+* sigstore/cosign-installer version ([3214a5e](https://github.com/JaredReisinger/asp/commit/3214a5ee284eb95ecdf2081ad71de36aae276504))
+
+### Miscellaneous Chores
+
+* update action versions ([922c46e](https://github.com/JaredReisinger/asp/commit/922c46ea8eaa0b3f6cdcf57b92df25c7a50cefba))
+
 ## [0.4.1](https://github.com/JaredReisinger/asp/compare/v0.4.0...v0.4.1) (2026-02-06)
 
 ### Bug Fixes
