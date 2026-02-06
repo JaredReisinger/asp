@@ -3,6 +3,21 @@
 _All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
 
 
+## [0.4.1](https://github.com/JaredReisinger/asp/compare/v0.4.0...v0.4.1) (2026-02-06)
+
+### Bug Fixes
+
+* basic support for nested commands ([aabad7e](https://github.com/JaredReisinger/asp/commit/aabad7efc89ebb8781ba556cc51076673c78b488))
+
+### Documentation
+
+* fix godoc cross-reference formatting ([491a4b5](https://github.com/JaredReisinger/asp/commit/491a4b57f3ac69c9ae2398c42d0d731969ac5658))
+* tweak readme pkg.go.dev reference name ([77ea07e](https://github.com/JaredReisinger/asp/commit/77ea07e6be6b10947ab4cf272b8051662ae6423e))
+
+### Continuous Integration
+
+* fix goreleaser version ([0c4ae90](https://github.com/JaredReisinger/asp/commit/0c4ae907d9a398445aee2399192ea52bfae5d18f))
+
 ## [0.4.0](https://github.com/JaredReisinger/asp/compare/v0.3.1...v0.4.0) (2025-08-13)
 
 ### Features
