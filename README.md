@@ -13,6 +13,7 @@
 - [Defaults](https://github.com/JaredReisinger/asp/blob/main/docs/03-defaults.md)
 - [Options](https://github.com/JaredReisinger/asp/blob/main/docs/04-options.md)
 - [Config tags](https://github.com/JaredReisinger/asp/blob/main/docs/05-config-tags.md)
+- [Nested commands](https://github.com/JaredReisinger/asp/blob/main/docs/06-nested-commands.md)
 
 ## Why does this exist?
 
