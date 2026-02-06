@@ -130,13 +130,45 @@ func AttachInstance[T Config](cmd *cobra.Command, configDefaults T, options ...O
 	}
 
 	// In addition to setting up flags and config, also seed a pre-run on the
-	// command to ensure the context is available
-	cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
-		ctx := cmd.Context()
+	// command to ensure the context is available. This has to happen in the
+	// pre-run in case the caller uses ExecuteContext and provides their own
+	// context. We also need to make sure to pass through to any already
+	// existing pre-run hook. For nested [cobra.Command] trees, the
+	// [cobra.EnableTraverseRunHooks] should be set to `true`.
+	attachedCmd := cmd
+	prevPreRunE := cmd.PersistentPreRunE
+	prevPreRun := cmd.PersistentPreRun
+
+	cmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		contextCmd := cmd
+		for contextCmd != nil && contextCmd != attachedCmd {
+			contextCmd = contextCmd.Parent()
+		}
+
+		if contextCmd == nil {
+			return errors.New("unexpected: attached command not in command chain")
+		}
+
+		// get or create the context
+		ctx := contextCmd.Context()
 		if ctx == nil {
 			ctx = context.Background()
 		}
-		cmd.SetContext(context.WithValue(ctx, ContextKey, a))
+		contextCmd.SetContext(context.WithValue(ctx, ContextKey, a))
+
+		// Based on the cobra code, the "E" variant takes precedent, and the
+		// non-"E" variant is only called if there is no "E". We follow the same
+		// logic here.
+		if prevPreRunE != nil {
+			return prevPreRunE(cmd, args)
+		}
+
+		if prevPreRun != nil {
+			prevPreRun(cmd, args)
+			return nil
+		}
+
+		return nil
 	}
 
 	return a, nil

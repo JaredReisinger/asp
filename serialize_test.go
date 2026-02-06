@@ -10,6 +10,7 @@ import (
 type withSensitive struct {
 	Public  string
 	Private string `asp.sensitive:"true"`
+	ignored bool   // unexported fields are ignored!
 }
 
 func TestSerializeFlags(t *testing.T) {
@@ -41,8 +42,8 @@ func TestSerializeFlags(t *testing.T) {
 		},
 	}
 
-	sensitiveEmpty := withSensitive{"public", ""}
-	sensitiveSet := withSensitive{"", "private"}
+	sensitiveEmpty := withSensitive{"public", "", false}
+	sensitiveSet := withSensitive{"", "private", false}
 
 	cases := map[string]struct {
 		input     any
@@ -80,4 +81,24 @@ func TestSerializeFlags(t *testing.T) {
 			assert.Equal(t, expected, s)
 		})
 	}
+}
+
+func TestSerializeFlagsNonStruct(t *testing.T) {
+	s, err := SerializeFlags(1, false)
+	assert.ErrorIs(t, err, ErrConfigMustBeStruct)
+	assert.Equal(t, "", s)
+}
+
+func TestSerializeFlagsUnsupportedType(t *testing.T) {
+	type unsupported struct {
+		Rune rune
+	}
+
+	s, err := SerializeFlags(unsupported{}, false)
+	assert.ErrorIs(t, err, ErrConfigFieldUnsupported)
+	assert.Equal(t, "", s)
+
+	s, err = SerializeFlags(struct{ Inner unsupported }{}, false)
+	assert.ErrorIs(t, err, ErrConfigFieldUnsupported)
+	assert.Equal(t, "", s)
 }

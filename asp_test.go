@@ -1,6 +1,7 @@
 package asp
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -15,6 +16,7 @@ type aspTestConfig struct {
 	Duration time.Duration
 	Bool     bool
 	Int      int
+	ignored  bool // unexported fields are ignored!
 }
 
 var defaultConfig = aspTestConfig{}
@@ -123,14 +125,14 @@ func TestAttachInstanceWithBogusOption(t *testing.T) {
 	assert.Nil(t, a)
 }
 
-func TestAttachInstanceWithUnsupportedConfig(t *testing.T) {
+func TestAttachWithUnsupportedConfig(t *testing.T) {
 	cmd := &cobra.Command{}
 
 	badConfig := struct {
 		BadMember *int // we don't support pointer members!
 	}{}
 
-	_, err := AttachInstance(cmd, badConfig)
+	err := Attach(cmd, badConfig)
 	assert.ErrorIs(t, err, ErrConfigFieldUnsupported)
 }
 
@@ -176,4 +178,100 @@ func TestAttachedCommandWrongType(t *testing.T) {
 	assert.NoError(t, err)
 
 	cmd.Execute()
+}
+
+func TestAttachWithPersistentPreRunE(t *testing.T) {
+	ranCmdPreRun := false
+
+	cmd := &cobra.Command{
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			ranCmdPreRun = true
+			return nil
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			cfg, err := Get[aspTestConfig](cmd)
+			assert.NoError(t, err)
+			assert.NotNil(t, cfg)
+		},
+	}
+
+	err := Attach(cmd, defaultConfig)
+	assert.NoError(t, err)
+
+	cmd.Execute()
+
+	assert.True(t, ranCmdPreRun)
+}
+
+func TestAttachWithPersistentPreRun(t *testing.T) {
+	ranCmdPreRun := false
+
+	cmd := &cobra.Command{
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			ranCmdPreRun = true
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			cfg, err := Get[aspTestConfig](cmd)
+			assert.NoError(t, err)
+			assert.NotNil(t, cfg)
+		},
+	}
+
+	err := Attach(cmd, defaultConfig)
+	assert.NoError(t, err)
+
+	cmd.Execute()
+
+	assert.True(t, ranCmdPreRun)
+}
+
+func TestAttachWithChildCommand(t *testing.T) {
+	ranCmdPreRun := false
+
+	cmd := &cobra.Command{
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			ranCmdPreRun = true
+		},
+	}
+
+	childCmd := &cobra.Command{
+		Use: "child",
+		Run: func(cmd *cobra.Command, args []string) {
+			cfg, err := Get[aspTestConfig](cmd.Parent())
+			assert.NoError(t, err)
+			assert.NotNil(t, cfg)
+		},
+	}
+	cmd.AddCommand(childCmd)
+
+	err := Attach(cmd, defaultConfig)
+	assert.NoError(t, err)
+
+	cmd.SetArgs([]string{"child"})
+	cmd.Execute()
+
+	assert.True(t, ranCmdPreRun)
+}
+
+func TestAttachWithExecuteContext(t *testing.T) {
+	ranCmd := false
+
+	cmd := &cobra.Command{
+		Run: func(cmd *cobra.Command, args []string) {
+			cfg, err := Get[aspTestConfig](cmd)
+			assert.NoError(t, err)
+			assert.NotNil(t, cfg)
+
+			assert.Equal(t, "TEST", cmd.Context().Value("TEST"))
+			ranCmd = true
+		},
+	}
+
+	err := Attach(cmd, defaultConfig)
+	assert.NoError(t, err)
+
+	ctx := context.WithValue(context.Background(), "TEST", "TEST")
+	cmd.ExecuteContext(ctx)
+
+	assert.True(t, ranCmd)
 }

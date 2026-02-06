@@ -3,3 +3,5 @@ someFlag: true
 manyNumbers: [1, 2, 3, 4]
 
 secretValue: this will be redacted
+
+anotherValue: this is for the child command

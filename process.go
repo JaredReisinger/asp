@@ -261,31 +261,3 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 
 	return nil
 }
-
-// func (a *asp[T]) Execute(handler func(config T, args []string)) error {
-// 	// Set up run-handler for the cobra command...
-// 	a.cmd.Run = func(cmd *cobra.Command, args []string) {
-// 		log.Printf("BEFORE (INSIDE): %v", a.vip.AllSettings())
-// 		// TODO: unmarshal the settings into the expected config type!
-// 		cfgVal := reflect.New(a.baseType)
-// 		handler(cfgVal.Interface().(T), args)
-// 		log.Printf("AFTER (INSIDE): %v", a.vip.AllSettings())
-// 	}
-
-// 	log.Printf("BEFORE: %v", a.vip.AllSettings())
-
-// 	// a.cmd.ParseFlags()
-// 	err := a.cmd.Execute()
-// 	log.Printf("error? %v", err)
-
-// 	log.Printf("AFTER: %v", a.vip.AllSettings())
-// 	return err
-// }
-
-// func (a *asp[T]) Command() *cobra.Command {
-// 	return a.cmd
-// }
-
-// func (a *asp[T]) Viper() *viper.Viper {
-// 	return a.vip
-// }

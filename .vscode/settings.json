@@ -1,13 +1,19 @@
 {
     "cSpell.words": [
         "conventionalcommits",
+        "coverprofile",
         "gomod",
         "goreleaser",
+        "gosec",
         "iancoleman",
         "intf",
+        "jaredreisinger",
         "mapstructure",
+        "Messagef",
         "mitchellh",
+        "securego",
         "strcase",
-        "stretchr"
+        "stretchr",
+        "tmpl"
     ]
 }

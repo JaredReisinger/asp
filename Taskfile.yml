@@ -68,13 +68,19 @@ tasks:
     desc: Run the example
     aliases: [run]
     cmds:
-      - go run example/main.go
+      - go run example/main.go {{.CLI_ARGS}}
+
+  example:run:child:
+    desc: Run the example
+    aliases: [run]
+    cmds:
+      - go run example/main.go child {{.CLI_ARGS}}
 
   example:run:config:
     desc: Run the example
     aliases: [run]
     cmds:
-      - go run example/main.go --config example/ad-hoc-config.yaml
+      - go run example/main.go --config example/ad-hoc-config.yaml {{.CLI_ARGS}}
 
   release:
     desc: Run a snapshot (test) release

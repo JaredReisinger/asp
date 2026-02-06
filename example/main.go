@@ -8,7 +8,7 @@ import (
 	"github.com/jaredreisinger/asp"
 )
 
-type Config struct {
+type rootConfig struct {
 	SomeValue       string
 	SomeFlag        bool
 	ManyNumbers     []int
@@ -24,28 +24,44 @@ type Config struct {
 	Verbose bool `asp.short:"v" asp.desc:"get noisy"`
 }
 
-func main() {
-	defaults := Config{
+type childConfig struct {
+	AnotherValue string
+	AnotherFlag  bool
+}
+
+var (
+	rootCmd = &cobra.Command{
+		Use: "root",
+		Run: runRoot,
+	}
+
+	childCmd = &cobra.Command{
+		Use: "child",
+		Run: runChild,
+	}
+)
+
+func init() {
+	err := asp.Attach(rootCmd, rootConfig{
 		SomeValue: "DEFAULT STRING!",
-	}
-
-	cmd := &cobra.Command{
-		Run: commandHandler,
-	}
-
-	err := asp.Attach(
-		cmd, defaults,
-		asp.WithDefaultConfigName("asp-example"),
-	)
+	}, asp.WithDefaultConfigName("asp-example"))
 	cobra.CheckErr(err)
 
-	err = cmd.Execute()
+	err = asp.Attach(childCmd, childConfig{})
+	cobra.CheckErr(err)
+
+	rootCmd.AddCommand(childCmd)
+	cobra.EnableTraverseRunHooks = true
+}
+
+func main() {
+	err := rootCmd.Execute()
 	cobra.CheckErr(err)
 }
 
-func commandHandler(cmd *cobra.Command, args []string) {
+func runRoot(cmd *cobra.Command, args []string) {
 	// get the config using the asp.Asp instance attached to cmd
-	config, err := asp.Get[Config](cmd)
+	config, err := asp.Get[rootConfig](cmd)
 	cobra.CheckErr(err)
 
 	log.Printf("got config: %#v", config)
@@ -53,4 +69,23 @@ func commandHandler(cmd *cobra.Command, args []string) {
 	s, err := asp.SerializeFlags(config, true)
 	cobra.CheckErr(err)
 	log.Printf("serialized flags: %s", s)
+}
+
+func runChild(cmd *cobra.Command, args []string) {
+	// get the rootCfg using the asp.Asp instance attached to cmd
+	rootCfg, err := asp.Get[rootConfig](cmd.Root())
+	cobra.CheckErr(err)
+	log.Printf("got root config: %#v", rootCfg)
+
+	childCfg, err := asp.Get[childConfig](cmd)
+	cobra.CheckErr(err)
+	log.Printf("got child config: %#v", childCfg)
+
+	s, err := asp.SerializeFlags(rootCfg, true)
+	cobra.CheckErr(err)
+	log.Printf("serialized root flags: %s", s)
+
+	s, err = asp.SerializeFlags(childCfg, true)
+	cobra.CheckErr(err)
+	log.Printf("serialized child flags: %s", s)
 }
