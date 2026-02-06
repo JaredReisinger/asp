@@ -10,11 +10,11 @@ jobs:
   pipeline:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: '>=1.24'
 
@@ -30,16 +30,16 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
           version: '~> v2'
           install-only: true
 
       - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@v4
 
       - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
