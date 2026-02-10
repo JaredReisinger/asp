@@ -3,6 +3,20 @@
 _All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
 
 
+## [0.5.0](https://github.com/JaredReisinger/asp/compare/v0.4.2...v0.5.0) (2026-02-10)
+
+### Features
+
+* allow `asp:\"-\"` to omit fields ([2253bb9](https://github.com/JaredReisinger/asp/commit/2253bb9bb661f5031781f531b3b112dc4090aed4))
+
+### Documentation
+
+* add nested commands link to main readme ([e0334eb](https://github.com/JaredReisinger/asp/commit/e0334eb9ac6f2fed87427a8c027452a6790210a8))
+
+### Miscellaneous Chores
+
+* **deps:** bump golang.org/x/crypto from 0.41.0 to 0.45.0 ([0e7c080](https://github.com/JaredReisinger/asp/commit/0e7c080013bd64d51f752996b389aabf2789ba8a))
+
 ## [0.4.2](https://github.com/JaredReisinger/asp/compare/v0.4.1...v0.4.2) (2026-02-06)
 
 ### Bug Fixes
