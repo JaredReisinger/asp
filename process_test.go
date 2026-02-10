@@ -119,6 +119,8 @@ func TestProcessStructInnerAttributes(t *testing.T) {
 		Four struct {
 			Five string `asp.long:"inner-long"`
 		} `asp.long:"outer-long"`
+
+		Skipped string `asp:"-"`
 	}
 
 	err := a.processStructInner(Config{}, attrs{})
@@ -133,6 +135,9 @@ func TestProcessStructInnerAttributes(t *testing.T) {
 		"three": "preferred",
 		// "four": "outer-long",
 		"five": "outer-long-inner-long",
+
+		// skipped does not appear!
+		"skipped": "MISSING",
 	}
 
 	for k, v := range cases {
@@ -141,8 +146,12 @@ func TestProcessStructInnerAttributes(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			assert.Nil(t, flags.Lookup(name))
-			assert.NotNil(t, flags.Lookup(long))
+			if long != "MISSING" {
+				assert.Nil(t, flags.Lookup(name))
+				assert.NotNil(t, flags.Lookup(long))
+			} else {
+				assert.Nil(t, flags.Lookup(name))
+			}
 		})
 	}
 }

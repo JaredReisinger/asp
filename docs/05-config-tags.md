@@ -57,7 +57,7 @@ If you are consistently providing most or all of the values, the `asp` tag is a 
 
 ### `asp`
 
-The “all the tags” tag, `asp:""` allows you to specify the long, short, env, desc, and sensitive values, separated by commas. The "explicit" tags always take precedence, but any non-empty portions of `asp` take precedence over the default fallback values. To _omit_ a value, the explicit attribute tag must be used.
+The “all the tags” tag, `asp:"..."` allows you to specify the long, short, env, desc, and sensitive values, separated by commas. The "explicit" tags always take precedence, but any non-empty portions of `asp` take precedence over the default fallback values. To _omit_ a value, the explicit attribute tag must be used. Similar to `json`, `yaml`, and other serializing struct tags, `asp:"-"` will omit a field from asp entirely.
 
 ### `asp.desc`
 

@@ -92,6 +92,12 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 		}
 
 		childAttrs := getAttributes(f)
+
+		// `asp:"-"` will cause a field to be skipped
+		if childAttrs.long == "-" {
+			continue
+		}
+
 		joinedAttrs := parentAttrs.join(childAttrs)
 
 		// Special handling for the description: if neither {{.Env}} or
