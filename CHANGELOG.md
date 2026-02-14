@@ -3,6 +3,12 @@
 _All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
 
 
+## [0.5.1](https://github.com/JaredReisinger/asp/compare/v0.5.0...v0.5.1) (2026-02-14)
+
+### Bug Fixes
+
+* respect `asp:\"-\"` in serialize, coverage ([62f8d5a](https://github.com/JaredReisinger/asp/commit/62f8d5aacf9d3697053d8db54385f557a26dc0de))
+
 ## [0.5.0](https://github.com/JaredReisinger/asp/compare/v0.4.2...v0.5.0) (2026-02-10)
 
 ### Features
