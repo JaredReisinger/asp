@@ -10,6 +10,7 @@ import (
 type withSensitive struct {
 	Public  string
 	Private string `asp.sensitive:"true"`
+	Ignored bool   `asp:"-"` // "-" fields are ignored!
 	ignored bool   // unexported fields are ignored!
 }
 
@@ -42,8 +43,8 @@ func TestSerializeFlags(t *testing.T) {
 		},
 	}
 
-	sensitiveEmpty := withSensitive{"public", "", false}
-	sensitiveSet := withSensitive{"", "private", false}
+	sensitiveEmpty := withSensitive{"public", "", false, false}
+	sensitiveSet := withSensitive{"", "private", false, false}
 
 	cases := map[string]struct {
 		input     any

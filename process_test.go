@@ -156,12 +156,17 @@ func TestProcessStructInnerAttributes(t *testing.T) {
 	}
 }
 
-// // I can't seem to test the "template does not parse" edge case.
-// func TestProcessBadDescription(t *testing.T) {
-// 	a := newBase(t)
+// I can't seem to test the "template does not parse" edge case.
+func TestProcessBadDescriptionTemplate(t *testing.T) {
+	a := newBase(t)
 
-// 	err := a.processStruct(struct {
-// 		Bad int `asp.description:"{{if}}"`
-// 	}{})
-// 	assert.NoError(t, err)
-// }
+	err := a.processStruct(struct {
+		Bad int `asp.desc:"{{.BOGUS"`
+	}{})
+	assert.Error(t, err)
+
+	err = a.processStruct(struct {
+		Bad int `asp.desc:"{{ 2 | camel }}"`
+	}{})
+	assert.Error(t, err)
+}

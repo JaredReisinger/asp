@@ -76,6 +76,12 @@ func serializeStructInner(s interface{}, omitEmpty bool, parentAttrs attrs) (str
 		}
 
 		childAttrs := getAttributes(f)
+
+		// `asp:"-"` will cause a field to be skipped
+		if childAttrs.ignored {
+			continue
+		}
+
 		joinedAttrs := parentAttrs.join(childAttrs)
 
 		// Rather than setting handled to true in our myriad cases, we default

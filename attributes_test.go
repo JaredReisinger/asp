@@ -100,15 +100,15 @@ func TestJoinField(t *testing.T) {
 func TestAttrsJoin(t *testing.T) {
 	t.Parallel()
 
-	attrsNone := attrs{"", "", "", "", "", false}
-	attrsAll := attrs{"Name", "long", "s", "ENV", "desc", false}
-	attrsSensitive := attrs{"", "", "", "", "", true}
+	attrsNone := attrs{false, "", "", "", "", "", false}
+	attrsAll := attrs{false, "Name", "long", "s", "ENV", "desc", false}
+	attrsSensitive := attrs{false, "", "", "", "", "", true}
 
 	cases := map[string][3]attrs{
-		"none none":      {attrsNone, attrsNone, attrs{"", "", "", "", "", false}},
-		"none all":       {attrsNone, attrsAll, attrs{"Name", "long", "s", "ENV", "desc", false}},
-		"all none":       {attrsAll, attrsNone, attrs{"Name", "long", "", "ENV", "", false}},
-		"all all":        {attrsAll, attrsAll, attrs{"Name.Name", "long-long", "s", "ENV_ENV", "desc", false}},
+		"none none":      {attrsNone, attrsNone, attrs{false, "", "", "", "", "", false}},
+		"none all":       {attrsNone, attrsAll, attrs{false, "Name", "long", "s", "ENV", "desc", false}},
+		"all none":       {attrsAll, attrsNone, attrs{false, "Name", "long", "", "ENV", "", false}},
+		"all all":        {attrsAll, attrsAll, attrs{false, "Name.Name", "long-long", "s", "ENV_ENV", "desc", false}},
 		"none sensitive": {attrsNone, attrsSensitive, attrsSensitive},
 		"sensitive none": {attrsSensitive, attrsNone, attrsSensitive},
 	}

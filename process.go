@@ -94,7 +94,7 @@ func (a *aspBase) processStructInner(s interface{}, parentAttrs attrs) error {
 		childAttrs := getAttributes(f)
 
 		// `asp:"-"` will cause a field to be skipped
-		if childAttrs.long == "-" {
+		if childAttrs.ignored {
 			continue
 		}
 

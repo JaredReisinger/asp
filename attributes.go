@@ -21,6 +21,7 @@ import (
 func getAttributes(f reflect.StructField) attrs {
 	// pre-fill with defaults from field name (canonicalize?)
 	a := attrs{
+		ignored:   false,
 		name:      f.Name,
 		long:      strcase.ToKebab(f.Name),
 		short:     "",
@@ -66,6 +67,7 @@ func init() {
 // The attrs struct holds the collection of attrs parsed from the struct field
 // tags.
 type attrs struct {
+	ignored   bool
 	name      string
 	long      string
 	short     string
@@ -75,6 +77,11 @@ type attrs struct {
 }
 
 func (a *attrs) setAll(s string) {
+	if s == "-" {
+		a.ignored = true
+		return
+	}
+
 	parts := strings.SplitN(s, ",", len(attrTags)-1)
 
 	for i, p := range parts {
