@@ -1,7 +1,17 @@
-# Changelog
+## v0.5.2 (2026-09-29)
 
-_All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines._
+### Bug Fixes
 
+* **dependencies:** upgrade dependencies
+
+### Other Changes
+
+* configure git user before releasing
+* update to go 1.27.1
+* **deps:** bump google.golang.org/grpc from 1.83.1 to 1.83.2
+* use semrel instead of both semantic-release *and* goreleaser
+* fix (hopefully) github action for semantic-release
+* switch tools from `tools.go` to `go get -tool`
 
 ## [0.5.1](https://github.com/JaredReisinger/asp/compare/v0.5.0...v0.5.1) (2026-02-14)
 
