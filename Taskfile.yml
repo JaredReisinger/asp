@@ -3,6 +3,9 @@ version: "3"
 # Since this is a library, we don't really build anything regularly... our
 # distribution is the raw source-code itself.  Nonetheless, we have tasks for
 # useful things like testing, running the example, etc.
+#
+# `task` is listed as a tool in the `go.mod` file, so you can run `go tool task
+# ...` if you don't have `task` installed yourself.
 
 vars:
   COVERAGE_DIR: ./coverage
@@ -10,19 +13,13 @@ vars:
 tasks:
   default:
     cmds:
-      - task: run
+      - go tool task --list
 
-  # The git hooks initialization isn't quite as streamlined as in Node/npm,
-  # where the package creator can "force install" the husky hooks during the
-  # "npm install" stage (which is a necessary precursor to doing any sort of
-  # development).  To approximate that, we have a "prepare" task that does the
-  # equivalent one-time local repo setup.  (Except for "task" itself, which is
-  # an annoying chicken-and-egg problem.)
   prepare:
     desc: One-time local repo setup
     cmds:
       - go mod download
-      - go run -v github.com/automation-co/husky install
+      - go tool husky install
 
   clean:
     desc: Clean project
@@ -46,15 +43,21 @@ tasks:
       - go tool cover -html {{.COVERAGE_DIR}}/cover.out -o {{.COVERAGE_DIR}}/coverage.html
 
   security:
-    desc: Run gosec for project
+    desc: Check code and dependencies for security issues
     cmds:
-      - go run github.com/securego/gosec/v2/cmd/gosec -quiet ./...
+      - cmd: echo "checking source for known mistakes..."
+        silent: true
+      - go tool gosec -quiet ./...
+      # no govulncheck until we can fix the failed dependency
+      # - cmd: echo "checking dependency vulnerabilities..."
+      #   silent: true
+      # - go tool govulncheck -scan module
 
   pre-commit:
     desc: Run pre-commit checks...
     deps:
       - test
-      # - security ## bogus internal error in gosec?
+      - security ## bogus internal error in gosec?
     cmds:
       - go vet ./...
 
