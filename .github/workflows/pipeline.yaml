@@ -18,12 +18,8 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-      # - uses: arduino/setup-task@v2
-      #   with:
-      #     # version: 3.20 # 3.x is good enough
-      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: |
+      - name: download dependencies, test, and validate security
+        run: |
           go mod download
           go tool task test
           go tool task security
@@ -32,47 +28,17 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
-      # - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-      #   uses: goreleaser/goreleaser-action@v7
-      #   with:
-      #     version: '~> v2'
-      #     install-only: true
-
-      # - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-      #   uses: sigstore/cosign-installer@v4.1.2
-
-      # - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-      #   uses: cycjimmy/semantic-release-action@v6
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     extra_plugins: |
-      #       @semantic-release/changelog
-      #       @semantic-release/git
-      #       @semantic-release/exec
-      #       conventional-changelog@latest
-      #       conventional-changelog-conventionalcommits
-
-      # - uses: codecov/codecov-action@v7
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-
-      # - uses: act10ns/slack@v2
-      #   if: always()
-      #   with:
-      #     status: ${{ job.status }}
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
       - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-        name: configure git identity
+        name: release
         run: |
-          git config user.name "Workflow Bot"
+          git config user.name "SemRel Bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-        run: go tool semrel release
+          go tool semrel release --output-file .release.json
+
+          if [[ "$(jq -r '.released' .release.json)" = "true" ]]; then
+            git push
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
