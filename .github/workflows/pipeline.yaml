@@ -23,16 +23,14 @@ jobs:
       #     # version: 3.20 # 3.x is good enough
       #     repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: go mod download
-
-      - run: go tool task test
-
-      - run: go tool task security
+      - run: |
+          go mod download
+          go tool task test
+          go tool task security
 
       - uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-
 
       # - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
       #   uses: goreleaser/goreleaser-action@v7
@@ -66,7 +64,14 @@ jobs:
       #   env:
       #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      - run: go tool semrel release
+      - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+        name: configure git identity
+        run: |
+          git config user.name "Workflow Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+        run: go tool semrel release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
