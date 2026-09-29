@@ -17,13 +17,26 @@ tagPrefix: v
 #   - type: revert
 #     bump: patch
 
+# commit_changelog: false  # handled by generator-changelog-md plugin
+
 plugins:
   - uses: '@semrel/analyzer-conventional'
 
+  ## NOTE: neither generator-release-notes nor generator-changelog-md seems to
+  ## do anything different from the default semrel behavior
+
   # - uses: '@semrel/generator-release-notes'
+  #   phase: generator
+  #   args:
+  #     signature: "true"
 
   # - uses: '@semrel/generator-changelog-md'
+  #   # yaml-language-server: $schema=https://registry.semrel.io/schemas/plugins/generator-changelog-md/latest.json
+  #   phase: pre-tag
   #   args:
+  #     # keep_releases: "3"
+  #     signature: "true"
+  #     group_by_type: "true"
   #     file: CHANGELOG.md
 
   - uses: '@semrel/condition-github-actions'
