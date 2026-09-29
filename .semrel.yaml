@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://registry.semrel.io/schemas/core/v1.json
+schemaVersion: 1
+
+branches:
+  - name: main
+
+tagPrefix: v
+
+## These are the default rules...
+# rules:
+#   - type: feat
+#     bump: minor
+#   - type: fix
+#     bump: patch
+#   - type: perf
+#     bump: patch
+#   - type: revert
+#     bump: patch
+
+plugins:
+  - uses: '@semrel/analyzer-conventional'
+
+  # - uses: '@semrel/generator-release-notes'
+
+  # - uses: '@semrel/generator-changelog-md'
+  #   args:
+  #     file: CHANGELOG.md
+
+  - uses: '@semrel/condition-github-actions'
+    phase: condition
+
+  - uses: '@semrel/provider-github'
+
+  - uses: '@semrel/hook-slack'
+    args:
+      webhook_url: '{{ env "SLACK_WEBHOOK_URL" }}'

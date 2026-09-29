@@ -12,6 +12,7 @@
         "Messagef",
         "mitchellh",
         "securego",
+        "semrel",
         "strcase",
         "stretchr",
         "tmpl"

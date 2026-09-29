@@ -25,6 +25,7 @@ require (
 	cloud.google.com/go/monitoring v1.30.0 // indirect
 	cloud.google.com/go/storage v1.64.0 // indirect
 	dario.cat/mergo v1.0.2 // indirect
+	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.35.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.59.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.59.0 // indirect
@@ -34,6 +35,7 @@ require (
 	github.com/Ladicle/tabwriter v1.0.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.5.0 // indirect
+	github.com/SemRels/semrel v0.26.3 // indirect
 	github.com/alecthomas/chroma/v2 v2.27.0 // indirect
 	github.com/anthropics/anthropic-sdk-go v1.66.0 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
@@ -88,6 +90,7 @@ require (
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/go-sprout/sprout v1.1.1 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/go-task/task/v3 v3.53.1 // indirect
 	github.com/go-task/template v0.2.0 // indirect
@@ -180,12 +183,14 @@ require (
 	google.golang.org/grpc v1.83.1 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	mvdan.cc/sh/moreinterp v0.0.0-20260817215856-d6550df7ed8d // indirect
 	mvdan.cc/sh/v3 v3.13.2-0.20260817215856-d6550df7ed8d // indirect
 )
 
 tool (
 	github.com/JosephNaberhaus/go-mitizen
+	github.com/SemRels/semrel/cmd/semrel
 	github.com/automation-co/husky
 	github.com/conventionalcommit/commitlint
 	github.com/go-task/task/v3/cmd/task

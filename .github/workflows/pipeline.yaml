@@ -27,34 +27,47 @@ jobs:
 
       - run: go tool task test
 
-      - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-        uses: goreleaser/goreleaser-action@v7
-        with:
-          version: '~> v2'
-          install-only: true
+      - run: go tool task security
 
-      - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-        uses: sigstore/cosign-installer@v4.1.2
-
-      - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-        uses: cycjimmy/semantic-release-action@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/git
-            @semantic-release/exec
-            conventional-changelog@latest
-            conventional-changelog-conventionalcommits
-
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
-      - uses: act10ns/slack@v2
-        if: always()
-        with:
-          status: ${{ job.status }}
+
+      # - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+      #   uses: goreleaser/goreleaser-action@v7
+      #   with:
+      #     version: '~> v2'
+      #     install-only: true
+
+      # - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+      #   uses: sigstore/cosign-installer@v4.1.2
+
+      # - if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+      #   uses: cycjimmy/semantic-release-action@v6
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     extra_plugins: |
+      #       @semantic-release/changelog
+      #       @semantic-release/git
+      #       @semantic-release/exec
+      #       conventional-changelog@latest
+      #       conventional-changelog-conventionalcommits
+
+      # - uses: codecov/codecov-action@v7
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+
+      # - uses: act10ns/slack@v2
+      #   if: always()
+      #   with:
+      #     status: ${{ job.status }}
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - run: go tool semrel release
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+

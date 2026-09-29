@@ -15,3 +15,7 @@
 # vendor/
 /coverage/
 /dist/
+
+.semrel/
+.semrel-analytics.jsonl
+.env*

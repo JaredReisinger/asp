@@ -28,6 +28,8 @@ cloud.google.com/go/trace v1.16.0 h1:GmQovzFc5F0CNfl0VLgL64aoTtu7xsM0YajW2GlG9+E
 cloud.google.com/go/trace v1.16.0/go.mod h1:r+bdAn16dKLSV1G2D5v3e58IlQlizfxWrUfjx7kM7X0=
 dario.cat/mergo v1.0.2 h1:85+piFYR1tMbRrLcDwR18y4UKJ3aH1Tbzi24VRW1TK8=
 dario.cat/mergo v1.0.2/go.mod h1:E/hbnu0NxMFBjpMIE34DRGLWqDy0g5FuKDhCb31ngxA=
+github.com/BurntSushi/toml v1.6.0 h1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=
+github.com/BurntSushi/toml v1.6.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.35.0 h1:bN1gA3of5bXtbnLsRPrwfmbbe7A5UWFlcTHseujLnpc=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.35.0/go.mod h1:Yj5vHEz/aAepZGliRJsA6uvHAVAQyEwajq9ORCHPxzM=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.59.0 h1:c/Ivw7FuawPLfrr+zB0LZKeCchO2cAHQpF2qZ6OV7rQ=
@@ -50,6 +52,8 @@ github.com/Masterminds/semver/v3 v3.5.0 h1:kQceYJfbupGfZOKZQg0kou0DgAKhzDg2NZPAw
 github.com/Masterminds/semver/v3 v3.5.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
 github.com/Masterminds/sprig/v3 v3.3.0 h1:mQh0Yrg1XPo6vjYXgtf5OtijNAKJRNcTdOOGZe3tPhs=
 github.com/Masterminds/sprig/v3 v3.3.0/go.mod h1:Zy1iXRYNqNLUolqCpL4uhk6SHUMAOSCzdgBfDb35Lz0=
+github.com/SemRels/semrel v0.26.3 h1:hO7bFCa0q1htmZo2pFFsQfGa7cJj9bBRX76g1FXUTZM=
+github.com/SemRels/semrel v0.26.3/go.mod h1:xefq8T0i/k3YFRuqNSzQ78MK7DNpF0vNUd94x8B2xLc=
 github.com/alecthomas/assert/v2 v2.11.0 h1:2Q9r3ki8+JYXvGsDyBXwH3LcJ+WK5D0gc5E8vS6K3D0=
 github.com/alecthomas/assert/v2 v2.11.0/go.mod h1:Bze95FyfUr7x34QZrjL+XP+0qgp/zg8yS+TtBj1WA3k=
 github.com/alecthomas/chroma/v2 v2.27.0 h1:FodwmyOBgJULFYmDqibcp9pvfDLWdtPRh9v/r5BXYZs=
@@ -180,6 +184,8 @@ github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
 github.com/go-logr/stdr v1.2.2/go.mod h1:mMo/vtBO5dYbehREoey6XUKy/eSumjCCveDpRre4VKE=
 github.com/go-quicktest/qt v1.102.0 h1:HSQxCeh5YZH3EL3W39ixjtyaEhcWSXQHtHnMBzSs474=
 github.com/go-quicktest/qt v1.102.0/go.mod h1:p4lGIVX+8Wa6ZPNDvqcxq36XpUDLh42FLetFU7odllI=
+github.com/go-sprout/sprout v1.1.1 h1:W1k8rnSGnKHDR5Z5M8pi22zjFvAx9mRsomsfFT9c85c=
+github.com/go-sprout/sprout v1.1.1/go.mod h1:/gb8yk3HCg6S5+X16PDh+mVjk+6KFtKb6j5xoix4sVk=
 github.com/go-task/slim-sprig/v3 v3.0.0 h1:sUs3vkvUymDpBKi3qH1YSqBQk9+9D/8M2mN1vB6EwHI=
 github.com/go-task/slim-sprig/v3 v3.0.0/go.mod h1:W848ghGpv3Qj3dhTPRyJypKRiqCdHZiAzKg9hl15HA8=
 github.com/go-task/task/v3 v3.53.1 h1:4myl5NHvq30uSkkoWH4Fz0OapYVGRci3AiN11yJti08=
@@ -431,6 +437,8 @@ gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntN
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
 gopkg.in/yaml.v2 v2.4.0 h1:D8xgwECY7CYvx+Y2n4sBz93Jn9JRvxdiyyo8CTfuKaY=
 gopkg.in/yaml.v2 v2.4.0/go.mod h1:RDklbk79AGWmwhnvt/jBztapEOGDOx6ZbXqjP6csGnQ=
+gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 mvdan.cc/sh/moreinterp v0.0.0-20260817215856-d6550df7ed8d h1:VxKlXmio7XEU6iZ8AgMjDfm071ceDmbjpRnEcgxAqn0=
 mvdan.cc/sh/moreinterp v0.0.0-20260817215856-d6550df7ed8d/go.mod h1:SR7UOjTQQhhrUu6d6lNtjAmdqmlMqr0lR/UWTxY8wJM=
 mvdan.cc/sh/v3 v3.13.2-0.20260817215856-d6550df7ed8d h1:LlqUgrIy872/RmROjVtmRg3oK4RvvqZZr5SfqHSg7Ko=
