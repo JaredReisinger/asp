@@ -48,10 +48,13 @@ tasks:
       - cmd: echo "checking source for known mistakes..."
         silent: true
       - go tool gosec -quiet ./...
-      # no govulncheck until we can fix the failed dependency
-      # - cmd: echo "checking dependency vulnerabilities..."
-      #   silent: true
-      # - go tool govulncheck -scan module
+      - cmd: echo "checking dependency vulnerabilities..."
+        silent: true
+      # govulncheck gives a warning about golang.org/x/crypto/openpgp, but
+      # *nothing* is pulling that in.
+      - go tool govulncheck -show verbose,color ./...
+      - cmd: echo "If only GO-2026-5932 for golang.org/x/crypto/openpgp was shown, that's okay."
+        silent: true
 
   pre-commit:
     desc: Run pre-commit checks...
